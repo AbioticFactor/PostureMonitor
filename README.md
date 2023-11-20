@@ -1,1 +1,1 @@
-# PostureMonitor
+# mtg-collection-manager
