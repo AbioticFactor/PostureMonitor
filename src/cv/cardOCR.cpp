@@ -4,9 +4,6 @@
 #include <leptonica/allheaders.h>
 #include <string>
 
-
-
-
 // use openCV to load image and find/ crop bottom left location
  
 // tesserect to read the card and return bottom left info text
@@ -18,30 +15,37 @@
 class cardOCR
 {
 private:
-    std::unique_ptr<tesseract::TessBaseAPI> api;
-    Pix *image;
-    char *outText;
+    std::unique_ptr<tesseract::TessBaseAPI, std::function<void(tesseract::TessBaseAPI*)>> api;
+    std::unique_ptr<Pix, std::function<void(Pix*)>> image;
+    std::unique_ptr<char, std::function<void(char*)>> outText;
 
 
-    // can directly get card data if bottom left exists
-    std::string detectBottomLeft(cv::Mat im)
-    {
-        return "pass";
-    }
-
-    // match up card name and picture to get output
-    std::string detectNamePicture(cv::Mat im)
-    {
-        return "pass";
+    // Function to preprocess the image and return a binarized version
+    cv::Mat preprocessImage(const cv::Mat &image) {
+        cv::Mat gray, thresh;
+        cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+        threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
+        return thresh;
     }
 
 
 public:
-    cardOCR()
+
+    cardOCR() :
+        api(new tesseract::TessBaseAPI(), [](tesseract::TessBaseAPI* api) 
+        {
+            if(api)
+            {
+                api->End();
+                }}), 
+        image(nullptr, [](Pix *p) { pixDestroy(&p); }), 
+        outText(nullptr, [](char *c) { delete[] c; })
     {
         char config1[] = "path/to/my.patterns.config";
         char *configs[] = {config1};
         int configs_size = 1;
+
+
 
         if (api->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY, configs, configs_size, NULL, NULL, false)) 
         {
@@ -55,17 +59,7 @@ public:
 
     ~cardOCR()
     {
-        api->End();
-        delete [] outText;
-        pixDestroy(&image);
-    }
 
-    // Function to preprocess the image and return a binarized version
-    cv::Mat preprocessImage(const cv::Mat &image) {
-        cv::Mat gray, thresh;
-        cvtColor(image, gray, cv::COLOR_BGR2GRAY);
-        threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
-        return thresh;
     }
 
     // TODO: finish logic
@@ -81,28 +75,35 @@ public:
         cv::findContours(grayImg, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
 
         double maxArea = 0;
-        cv::Rect cardRect;
+        cv::RotatedRect cardRect;
         for (const auto &contour : contours) {
             double area = cv::contourArea(contour);
             if (area > maxArea) {
                 maxArea = area;
-                cardRect = cv::boundingRect(contour);
+                cardRect = cv::minAreaRect(contour);
             }
         }
 
-        // ADJUST ROI
-        cv::Mat roi = im(cardRect).clone();
-        api->SetImage(roi.data, roi.cols, roi.rows, 3, roi.step);
+        // Extract the bottom left corner of the card
+        cv::Point2f rectPoints[4];
+        cardRect.points(rectPoints);
 
-        outText = api->GetUTF8Text();
+        // this assumes bottom left corner is the third point in rectPoints, check for sure
+        cv::Point2f bottomLeft = rectPoints[2];
+        // Define the size of the region you want to extract
+        int sizeScan = 100; // adjust to control tesserect input region
+        cv::Rect roi(bottomLeft.x - sizeScan, bottomLeft.y - sizeScan, sizeScan, sizeScan);
+
+        // Extract and process with Tesseract
+        cv::Mat croppedImg = im(roi);
+        api->SetImage(croppedImg.data, croppedImg.cols, croppedImg.rows, 3, croppedImg.step);
+
+        outText.reset(api->GetUTF8Text());
 
         // Get card info from database HERE
 
-        return std::string(outText);
+        return std::string(outText.get());
     }
-
-
-
 };
 
 
