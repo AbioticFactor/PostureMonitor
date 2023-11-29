@@ -1,5 +1,7 @@
 # Ignore Visual Studio Code directories
 .vscode/
+vcpkg-configuration.json
+vcpkg.json
 env/
 
 # Ignore build and output directories
@@ -16,6 +18,8 @@ CMakeCache.txt
 cmake_install.cmake
 *.cmake
 Makefile
+CMakePresets.json
+
 
 # Ignore files produced as output of CMake
 *.sln
