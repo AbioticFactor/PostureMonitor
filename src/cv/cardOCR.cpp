@@ -10,25 +10,8 @@
 
 // if no bgottom left text for tesserect then match by name and image maybe
 
-// if neither (land? then match by set then image (find set symbol))
-
 class cardOCR
 {
-private:
-    std::unique_ptr<tesseract::TessBaseAPI, std::function<void(tesseract::TessBaseAPI*)>> api;
-    std::unique_ptr<Pix, std::function<void(Pix*)>> image;
-    std::unique_ptr<char, std::function<void(char*)>> outText;
-
-
-    // Function to preprocess the image and return a binarized version
-    cv::Mat preprocessImage(const cv::Mat &image) {
-        cv::Mat gray, thresh;
-        cvtColor(image, gray, cv::COLOR_BGR2GRAY);
-        threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
-        return thresh;
-    }
-
-
 public:
 
     cardOCR() :
@@ -104,6 +87,21 @@ public:
 
         return std::string(outText.get());
     }
+
+private:
+    std::unique_ptr<tesseract::TessBaseAPI, std::function<void(tesseract::TessBaseAPI*)>> api;
+    std::unique_ptr<Pix, std::function<void(Pix*)>> image;
+    std::unique_ptr<char, std::function<void(char*)>> outText;
+
+
+    // Function to preprocess the image and return a binarized version
+    cv::Mat preprocessImage(const cv::Mat &image) {
+        cv::Mat gray, thresh;
+        cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+        threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
+        return thresh;
+    }
+
 };
 
 

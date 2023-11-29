@@ -52,6 +52,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 target_include_directories(${PROJECT_NAME} PRIVATE 
   include/common 
   include/cv 
+  include/database
   include/feeder
   ${OpenCV_INCLUDE_DIRS}
   ${Tesseract_INCLUDE_DIRS}
