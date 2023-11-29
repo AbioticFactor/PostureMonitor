@@ -1,0 +1,90 @@
+# Ignore Visual Studio Code directories
+.vscode/
+env/
+
+# Ignore build and output directories
+build/
+out/
+Release/
+Debug/
+bin/
+obj/
+
+# Ignore CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+*.cmake
+Makefile
+
+# Ignore files produced as output of CMake
+*.sln
+*.sublime-*
+*.swp
+*.user
+*.vspscc
+*.vssscc
+*.workspace
+
+# Ignore Vcpkg directory and user-specific files, but keep the manifest
+vcpkg_installed/
+!vcpkg.json
+!vcpkg-configuration.json
+
+# Ignore other files that are usually not part of the source
+.DS_Store
+*.opendb
+*.pidb
+*.svclog
+*.userprefs
+*.psess
+*.vsp
+*.vspx
+*.sap
+
+# Ignore specific file formats produced by C++ builds
+*.exe
+*.dll
+*.so
+*.dylib
+*.lib
+*.pdb
+*.ilk
+*.exp
+*.o
+*.obj
+*.a
+*.gch
+*.pch
+*.iobj
+*.ipdb
+*.tlog
+*.idb
+*.res
+*.pch
+*.sdf
+*.opensdf
+*.opt
+*.ncb
+*.db
+
+# Ignore specific file extensions that are usually not part of the source
+*.class
+*.log
+*.ctxt
+*.mtj.tmp/
+*.jar
+*.war
+*.ear
+*.nar
+*.rar
+*.zip
+*.tar.gz
+*.rar
+*.log
+*.tmp
+
+# Ignore OS generated files
+ehthumbs.db
+Icon?
+Thumbs.db
