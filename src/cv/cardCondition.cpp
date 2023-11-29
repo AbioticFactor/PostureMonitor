@@ -12,6 +12,6 @@
 class cardCondition
 {
 
-}
+};
 
 

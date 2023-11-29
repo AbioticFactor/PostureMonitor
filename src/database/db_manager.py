@@ -8,7 +8,7 @@ class DatabaseManager:
         self.cursor = self.conn.cursor()
         self.create_table()
 
-    # create db table
+    # create db table (amek that mana shit a tuple (3, 1WW))
     def create_table(self):
         create_table_query = '''
         CREATE TABLE IF NOT EXISTS cards (
@@ -28,8 +28,8 @@ class DatabaseManager:
 
     def add_card(self, card_data):
         self.cursor.execute('''
-        INSERT INTO cards (name, mana_cost, card_type, card_set, rarity, power, toughness, artist)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO cards (id, name, mana_cost, card_type, card_set, rarity, power, toughness, artist)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
         ''', card_data)
         self.conn.commit()
 

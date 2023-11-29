@@ -1,31 +1,60 @@
-# Minimum CMake version required
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.14)
 
-# Project name and version
-project(MTGCollectionManager VERSION 1.0)
+set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+  CACHE STRING "Vcpkg toolchain file")
 
-# Specify the C++ standard
+project(MTGCollectionManager)
+
+# Set C++17 as the standard and enforce it
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# Include directories for header files
-# include_directories(src/common/cpp src/anotherDirectory)
-include_directories(common/cpp)
+set(CMAKE_BUILD_TYPE Debug)
 
-# Add subdirectories that contain CMakeLists.txt for different modules
-# This is where you specify other CMakeLists.txt files in subdirectories of your project
-# add_subdirectory(src/ui/cpp)
-# add_subdirectory(src/cv/cpp)
-# Add other subdirectories as needed
+# Find required packages
+find_package(OpenCV REQUIRED)
+find_package(Leptonica REQUIRED)
+find_package(Tesseract CONFIG REQUIRED)
+# find_package(unofficial-sqlite3 CONFIG REQUIRED)
+# find_package(SQLiteCpp REQUIRED)
 
-# Add the executable for the project
-# Specify the main source file and any additional files required
-add_executable(MTGCollectionManager src/cpp/main.cpp)
-# If you have more source files, list them here separated by spaces
 
-# Link libraries if there are any
-# target_link_libraries(MyProject SomeLibrary)
-# Uncomment and replace 'SomeLibrary' with actual libraries if needed
+# # Define the executable and source files
+# add_executable(${PROJECT_NAME}
+#   src/main.cpp
+#   src/cv/cardCondition.cpp
+#   src/cv/cardOCR.cpp
+#   src/feeder/feeder.cpp
+#   src/ui/MainMenu.ui
+#   src/ui/MainMenu.ui
 
-# Additional configuration options can go here
-# For example, compiler options, linking options, etc.
+# )
+
+# Recursively find all .cpp and .ui files in the src directory
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE UI_FILES "src/*.ui")
+
+# Define the executable and source files
+add_executable(${PROJECT_NAME} ${SOURCES} ${UI_FILES})
+
+# Link libraries to your project
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+  ${OpenCV_LIBS}
+  Tesseract::libtesseract 
+  ${Leptonica_LIBRARIES} 
+  # SQLite::SQLite3
+  # unofficial::sqlite3::sqlite3
+  # SQLiteCpp
+  # ${SQLite3_LIBRARY}
+)
+
+# Include directories for the project
+target_include_directories(${PROJECT_NAME} PRIVATE 
+  include/common 
+  include/cv 
+  include/feeder
+  ${OpenCV_INCLUDE_DIRS}
+  ${Tesseract_INCLUDE_DIRS}
+  # ${SQLite3_INCLUDE_DIR}
+
+)

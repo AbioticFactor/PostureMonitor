@@ -1,1 +1,0 @@
-# mtg-collection-manager

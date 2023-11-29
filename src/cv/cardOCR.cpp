@@ -5,6 +5,8 @@
 #include <string>
 
 
+
+
 // use openCV to load image and find/ crop bottom left location
  
 // tesserect to read the card and return bottom left info text
@@ -19,27 +21,28 @@ private:
     tesseract::TessBaseAPI *api;
     Pix *image;
     char *outText;
-    char *configs[]={"path/to/my.patterns.config"};
-    int configs_size = 1;
 
 
     // can directly get card data if bottom left exists
     std::string detectBottomLeft(cv::Mat im)
     {
-        return "pass"
+        return "pass";
     }
 
     // match up card name and picture to get output
     std::string detectNamePicture(cv::Mat im)
     {
-        return "pass"
+        return "pass";
     }
 
 
 public:
     cardOCR()
     {
-        *api = new tesseract::TessBaseAPI(); // Pointer here or no?
+        char config1[] = "path/to/my.patterns.config";
+        char *configs[] = {config1};
+        int configs_size = 1;
+        api = new tesseract::TessBaseAPI(); 
         if (api->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY, configs, configs_size, NULL, NULL, false)) 
         {
         fprintf(stderr, "Could not initialize tesseract.\n");
@@ -48,29 +51,6 @@ public:
         api->SetPageSegMode(tesseract::PSM_AUTO);
 
         }
-    }
-
-    // Copy Constructor
-    cardOCR(const cardOCR& other)
-    {
-        api = new tesseract::TessBaseAPI(*(other.api)); // is this correct?
-        image = pixCopy(nullptr, other.image);
-        outText = strdup(other.outText);
-    }
-
-    // Assignment Operator
-    cardOCR& operator=(const cardOCR& other) {
-        if (this != &other) {
-            api->End();
-            delete api;
-            delete[] outText;
-            pixDestroy(&image);
-
-            api = new tesseract::TessBaseAPI(*(other.api)); // is this correct?
-            image = pixCopy(nullptr, other.image);
-            outText = strdup(other.outText);
-        }
-        return *this;
     }
 
     ~cardOCR()
@@ -82,29 +62,29 @@ public:
     }
 
     // TODO: finish logic
-    std::string getCardInfo(imPath)
+    std::string getCardInfo(std::string imPath)
     {
         cv::Mat im = cv::imread(imPath, cv::IMREAD_COLOR);
         // now transform the image
 
         // TALK WITH RAINA HERE: either need a foolproof way to check or need to check all and compare output (database)
+        // both, 1, 2
         std::string res = detectBottomLeft(im);
-        if(res != NULL){
-
-
+        if(size(res)){
+            
         }
 
         //at the end get the image back and set it here
         api->SetImage(im.data, im.cols, im.rows, 3, im.step);
 
-        outText = std::string(api->GetUTF8Text());
+        outText = api->GetUTF8Text();
 
-        return outText
+        return std::string(outText);
     }
 
 
 
-}
+};
 
 
 // IF NEED TO IMPROVE OUTPUT QUALITY FOLLOW THIS: https://github.com/tesseract-ocr/tessdoc/blob/main/ImproveQuality.md
