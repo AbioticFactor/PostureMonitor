@@ -18,7 +18,7 @@
 class cardOCR
 {
 private:
-    tesseract::TessBaseAPI *api;
+    std::unique_ptr<tesseract::TessBaseAPI> api;
     Pix *image;
     char *outText;
 
@@ -42,7 +42,7 @@ public:
         char config1[] = "path/to/my.patterns.config";
         char *configs[] = {config1};
         int configs_size = 1;
-        api = new tesseract::TessBaseAPI(); 
+
         if (api->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY, configs, configs_size, NULL, NULL, false)) 
         {
         fprintf(stderr, "Could not initialize tesseract.\n");
@@ -56,28 +56,47 @@ public:
     ~cardOCR()
     {
         api->End();
-        delete api;
         delete [] outText;
         pixDestroy(&image);
+    }
+
+    // Function to preprocess the image and return a binarized version
+    cv::Mat preprocessImage(const cv::Mat &image) {
+        cv::Mat gray, thresh;
+        cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+        threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
+        return thresh;
     }
 
     // TODO: finish logic
     std::string getCardInfo(std::string imPath)
     {
+        // Read in card and preprocess img
         cv::Mat im = cv::imread(imPath, cv::IMREAD_COLOR);
-        // now transform the image
+        cv::Mat grayImg = preprocessImage(im);
 
-        // TALK WITH RAINA HERE: either need a foolproof way to check or need to check all and compare output (database)
-        // both, 1, 2
-        std::string res = detectBottomLeft(im);
-        if(size(res)){
-            
+        // Assume largest contour is the card and get its bounding rectangle
+        // def make sure its a rectangle
+        std::vector<std::vector<cv::Point>> contours;
+        cv::findContours(grayImg, contours, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+        double maxArea = 0;
+        cv::Rect cardRect;
+        for (const auto &contour : contours) {
+            double area = cv::contourArea(contour);
+            if (area > maxArea) {
+                maxArea = area;
+                cardRect = cv::boundingRect(contour);
+            }
         }
 
-        //at the end get the image back and set it here
-        api->SetImage(im.data, im.cols, im.rows, 3, im.step);
+        // ADJUST ROI
+        cv::Mat roi = im(cardRect).clone();
+        api->SetImage(roi.data, roi.cols, roi.rows, 3, roi.step);
 
         outText = api->GetUTF8Text();
+
+        // Get card info from database HERE
 
         return std::string(outText);
     }

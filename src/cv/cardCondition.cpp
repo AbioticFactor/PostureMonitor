@@ -1,4 +1,3 @@
-// Finish setting up Conan and Cmake
 #include <opencv2/opencv.hpp>
 
 // template/heuristic matching?
