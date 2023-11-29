@@ -1,7 +1,0 @@
-{
-  "dependencies": [
-    "leptonica",
-    "opencv",
-    "tesseract"  
-  ]
-}

@@ -32,8 +32,8 @@ CMakePresets.json
 
 # Ignore Vcpkg directory and user-specific files, but keep the manifest
 vcpkg_installed/
-!vcpkg.json
-!vcpkg-configuration.json
+vcpkg.json
+vcpkg-configuration.json
 
 # Ignore other files that are usually not part of the source
 .DS_Store
