@@ -18,18 +18,6 @@ find_package(Tesseract CONFIG REQUIRED)
 # find_package(unofficial-sqlite3 CONFIG REQUIRED)
 # find_package(SQLiteCpp REQUIRED)
 
-
-# # Define the executable and source files
-# add_executable(${PROJECT_NAME}
-#   src/main.cpp
-#   src/cv/cardCondition.cpp
-#   src/cv/cardOCR.cpp
-#   src/feeder/feeder.cpp
-#   src/ui/MainMenu.ui
-#   src/ui/MainMenu.ui
-
-# )
-
 # Recursively find all .cpp and .ui files in the src directory
 file(GLOB_RECURSE SOURCES "src/*.cpp")
 file(GLOB_RECURSE UI_FILES "src/*.ui")
