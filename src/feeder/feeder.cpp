@@ -6,7 +6,7 @@
 
 // Finish setting up Conan and Cmake
 #include <iostream>
-// #include <pigpio.h>
+#include <pigpio.h>
 #include <chrono>
 #include <thread>
 #include <utility>
@@ -16,7 +16,6 @@
 
 // use openCV to take picture
  
-
 class feeder
 {
 public:
@@ -33,10 +32,10 @@ public:
         }
         std::cout << "Cameras online";
 
-        // if (gpioInitialise() < 0) {
-        //     std::cerr << "pigpio initialisation failed." << std::endl;
-        // }
-        // gpioSetMode(motorPin, PI_OUTPUT);
+        if (gpioInitialise() < 0) {
+            std::cerr << "pigpio initialisation failed." << std::endl;
+        }
+        gpioServo(SERVO, pwmNeutral);
         std::cout << "Motors online";
         std::cout << "All systems online";
         
@@ -45,14 +44,14 @@ public:
 
     ~feeder()
     {
-        // gpioTerminate();
+        gpioTerminate();
     }
 
     void feedCard()
     {
-        // gpioWrite(motorPin, 1);
-        // std::this_thread::sleep_for(std::chrono::seconds(5));
-        // gpioWrite(motorPin, 0);
+        gpioServo(SERVO, pwmDispense);
+        std::this_thread::sleep_for(std::chrono::seconds(5));
+        gpioServo(SERVO, pwmNeutral);
 
     }
 
@@ -67,10 +66,12 @@ public:
 
     void stop()
     {
-        // gpioWrite(motorPin, 0);
+        // gpioWrite(SERVO, 0);
     }
 
 private:
     cv::VideoCapture capFace, capBack;
-    int motorPin = 0;
+    const int SERVO = 0;
+    const int pwmDispense = 1600;
+    const int pwmNeutral = 1500;
 };

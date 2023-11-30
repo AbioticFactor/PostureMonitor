@@ -22,6 +22,10 @@ pkg_check_modules(Tesseract REQUIRED tesseract)
 # find_package(Tesseract REQUIRED)
 # If Leptonica is a direct dependency, uncomment the next line
 # find_package(Leptonica REQUIRED)
+find_library(PIGPIO_LIBRARY pigpio)
+if (NOT PIGPIO_LIBRARY)
+    message(FATAL_ERROR "pigpio library not found")
+endif()
 
 # Recursively find all .cpp and .ui files in the src directory
 file(GLOB_RECURSE SOURCES "src/*.cpp")
@@ -36,6 +40,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   ${Tesseract_LIBRARIES}
   sqlite3  
   /home/pi/SQLiteCpp/build/libSQLiteCpp.a  
+  ${PIGPIO_LIBRARY}
   # If you directly use Leptonica, uncomment the next line
   # ${Leptonica_LIBRARIES}
 )
