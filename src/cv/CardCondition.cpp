@@ -8,7 +8,7 @@
 
 // signed cards?
 
-class cardCondition
+class CardCondition
 {
 
 };

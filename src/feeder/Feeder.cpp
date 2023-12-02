@@ -16,11 +16,11 @@
 
 // use openCV to take picture
  
-class feeder
+class Feeder
 {
 public:
     
-    feeder() : capFace(0), capBack(1)
+    Feeder() : capFace(0), capBack(1)
     {
         if(!capFace.isOpened()){
             std::cerr << "Main camera failed" << std::endl;
@@ -42,7 +42,7 @@ public:
 
     }
 
-    ~feeder()
+    ~Feeder()
     {
         gpioTerminate();
     }

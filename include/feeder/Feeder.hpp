@@ -5,10 +5,10 @@
 #include <utility>
 #include <opencv2/opencv.hpp>
 
-class feeder {
+class Feeder {
 public:
-    feeder();
-    ~feeder();
+    Feeder();
+    ~Feeder();
 
     void feedCard();
     std::pair<cv::Mat, cv::Mat> captureCard();

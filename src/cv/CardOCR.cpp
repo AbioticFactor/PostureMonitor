@@ -10,11 +10,11 @@
 
 // if no bgottom left text for tesserect then match by name and image maybe
 
-class cardOCR
+class CardOCR
 {
 public:
 
-    cardOCR() :
+    CardOCR() :
         api(new tesseract::TessBaseAPI(), [](tesseract::TessBaseAPI* api) 
         {
             if(api)
@@ -40,7 +40,7 @@ public:
         }
     }
 
-    ~cardOCR()
+    ~CardOCR()
     {
 
     }

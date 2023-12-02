@@ -7,10 +7,10 @@
 #include <memory>
 #include <functional>
 
-class cardOCR {
+class CardOCR {
 public:
-    cardOCR();
-    ~cardOCR();
+    CardOCR();
+    ~CardOCR();
 
     std::string getCardInfo(std::string imPath);
 
