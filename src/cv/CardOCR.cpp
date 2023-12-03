@@ -3,6 +3,9 @@
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
 #include <string>
+#include <chrono>
+#include <feeder/Feeder.hpp>
+#include <database/DatabaseManager.hpp>
 
 // use openCV to load image and find/ crop bottom left location
  
@@ -10,46 +13,66 @@
 
 // if no bgottom left text for tesserect then match by name and image maybe
 
-class CardOCR
-{
+class CardOCR {
 public:
+    CardOCR() : api(new tesseract::TessBaseAPI(), [](tesseract::TessBaseAPI* ptr) {
+        if (ptr) {
+            ptr->End();
+            delete ptr;
+        }
+    }),
+    image(nullptr, [](Pix* ptr) {
+        if (ptr) {
+            pixDestroy(&ptr);
+        }
+    }),
+    outText(nullptr, [](char* ptr) {
+        if (ptr) {
+            delete[] ptr;
+        }
+    }) {
+        if (!initializeOCR()) {
+            throw std::runtime_error("OCR initialization failed.");
+        }
+        initializeCamera();
+    }
 
-    CardOCR() :
-        api(new tesseract::TessBaseAPI(), [](tesseract::TessBaseAPI* api) 
-        {
-            if(api)
-            {
-                api->End();
-                }}), 
-        image(nullptr, [](Pix *p) { pixDestroy(&p); }), 
-        outText(nullptr, [](char *c) { delete[] c; })
-    {
+    ~CardOCR() {
+        // Destructor implementation (if needed)
+    }
+
+    bool initializeOCR() {
         char config1[] = "path/to/my.patterns.config";
-        char *configs[] = {config1};
+        char* configs[] = {config1};
         int configs_size = 1;
 
-
-
-        if (api->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY, configs, configs_size, NULL, NULL, false)) 
-        {
-        fprintf(stderr, "Could not initialize tesseract.\n");
-        exit(1);
-        // Page Seg stuff: https://pyimagesearch.com/2021/11/15/tesseract-page-segmentation-modes-psms-explained-how-to-improve-your-ocr-accuracy/
+        if (api->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY, configs, configs_size, NULL, NULL, false)) {
+            fprintf(stderr, "Could not initialize tesseract.\n");
+            return false;
+        }
         api->SetPageSegMode(tesseract::PSM_AUTO);
 
+        std::cout << "OCR engaged\n";
+        return true;
+    }
+
+    bool initializeCamera() {
+        cv::VideoCapture capFace(0);
+
+        if (!capFace.isOpened()) {
+            std::cerr << "Camera failed\n";
+            return false;
         }
+        std::cout << "Camera online\n";
+        return true;
     }
 
-    ~CardOCR()
-    {
-
-    }
 
     // TODO: finish logic
-    std::string getCardInfo(std::string imPath)
+    std::tuple<std::string, cv::Mat> getCardInfo(const cv::Mat& im)
     {
         // Read in card and preprocess img
-        cv::Mat im = cv::imread(imPath, cv::IMREAD_COLOR);
+        cv::Mat returnFrame = im;
         cv::Mat grayImg = preprocessImage(im);
 
         // Assume largest contour is the card and get its bounding rectangle
@@ -85,14 +108,65 @@ public:
 
         // Get card info from database HERE
 
-        return std::string(outText.get());
+        return std::tuple<std::string, cv::Mat> {std::string(outText.get()), returnFrame};
+    }
+
+    // scan cards until no card seen for 10 seconds
+    void scan()
+    {
+        Feeder feeder;
+        DatabaseManager db("test_collection");
+        bool cardsLeft = true; // handle making this false with timer
+        bool scanning = false;
+        int waitTime = 10;
+        int newCardWaitTime = 1;
+        bool waitingForCard = false;
+
+        
+        while(cardsLeft){
+            feeder.feedCard();
+            scanning = true;
+            while(scanning){
+                auto start = std::chrono::system_clock::now();
+                cv::Mat frame;
+                capFace >> frame;
+
+                if (frame.empty()) {
+                    std::cerr << "Error: Empty frame captured." << std::endl;
+                    break;
+                }
+
+                if(!waitingForCard) {
+                    auto cardInfo = getCardInfo(frame);
+
+                    if(!std::get<0>(cardInfo).empty()){
+                        waitingForCard = true;
+                        auto cardText = std::get<0>(cardInfo);
+                        auto cardImg = std::get<1>(cardInfo);
+                        // proccess card text
+                        auto processedText = cardText;
+                        // PLACEHOLDER
+                        db.addCard(1, "Black Lotus", 0, "Colorless", "Artifact", "Alpha", "Rare", 0, 0, "Christopher Rush", "PATH");
+                        std::this_thread::sleep_for(std::chrono::seconds(newCardWaitTime));
+                        feeder.feedCard();
+                        continue;
+
+                    }
+                } 
+
+                auto now = std::chrono::system_clock::now();
+                auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - start);
+                if(elapsed.count() >= waitTime) scanning = false;
+                start = std::chrono::system_clock::now();
+            }
+        }
     }
 
 private:
     std::unique_ptr<tesseract::TessBaseAPI, std::function<void(tesseract::TessBaseAPI*)>> api;
     std::unique_ptr<Pix, std::function<void(Pix*)>> image;
     std::unique_ptr<char, std::function<void(char*)>> outText;
-
+    cv::VideoCapture capFace;
 
     // Function to preprocess the image and return a binarized version
     cv::Mat preprocessImage(const cv::Mat &image) {
@@ -101,6 +175,35 @@ private:
         threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
         return thresh;
     }
+
+    void destroyApi(tesseract::TessBaseAPI* api) {
+        if (api) {
+            api->End();
+            delete api;
+        }
+    }
+
+    void destroyPix(Pix* p) {
+        if (p) {
+            pixDestroy(&p);
+        }
+    }
+
+    void destroyChar(char* c) {
+        if (c) {
+            delete[] c;
+        }
+    }
+
+    // std::pair<cv::Mat, cv::Mat> captureCard()
+    // {
+    //     cv::Mat faceFrame, backFrame;
+    //     capFace >> faceFrame;
+    //     capBack >> backFrame;
+    //     return std::make_pair(faceFrame, backFrame);
+
+    // }
+
 
 };
 

@@ -19,20 +19,42 @@ find_package(OpenCV REQUIRED)
 find_package(SQLiteCpp REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(Tesseract REQUIRED tesseract)
-# find_package(Tesseract REQUIRED)
-# If Leptonica is a direct dependency, uncomment the next line
-# find_package(Leptonica REQUIRED)
 find_library(PIGPIO_LIBRARY pigpio)
 if (NOT PIGPIO_LIBRARY)
     message(FATAL_ERROR "pigpio library not found")
 endif()
+find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+
+# Enable AUTOMOC and AUTOUIC
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+# set(CMAKE_AUTOUIC ON)
 
 # Recursively find all .cpp and .ui files in the src directory
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-file(GLOB_RECURSE UI_FILES "src/*.ui")
+# file(GLOB_RECURSE UI_FILES "src/*.ui")
 
+set(UI_FILES 
+  src/interface/MainMenu.ui
+  src/interface/filter.ui
+  src/interface/rarity.ui
+  src/interface/search.ui
+  src/interface/scan.ui
+  src/interface/type.ui
+)
+
+foreach(UI_FILE ${UI_FILES})
+  get_filename_component(UI_FILENAME ${UI_FILE} NAME_WE)
+  set_source_files_properties(src/interface/${UI_FILENAME}.cpp PROPERTIES SKIP_AUTOUIC ON)
+endforeach()
+
+qt5_wrap_ui(UI_HEADERS ${UI_FILES})
 # Define the executable and source files
-add_executable(${PROJECT_NAME} ${SOURCES} ${UI_FILES})
+add_executable(${PROJECT_NAME} ${SOURCES} ${UI_HEADERS})
+
+foreach(HEADER ${UI_HEADERS})
+  message(STATUS "UI header: ${HEADER}")
+endforeach()
 
 # Link libraries to your project
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -41,8 +63,9 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   sqlite3  
   /home/pi/SQLiteCpp/build/libSQLiteCpp.a  
   ${PIGPIO_LIBRARY}
-  # If you directly use Leptonica, uncomment the next line
-  # ${Leptonica_LIBRARIES}
+  Qt5::Core 
+  Qt5::Gui 
+  Qt5::Widgets
 )
 
 # Include directories for the project
@@ -54,8 +77,16 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   ${OpenCV_INCLUDE_DIRS}
   ${Tesseract_INCLUDE_DIRS}
   /home/pi/SQLiteCpp/include
-  # If you directly use SQLite3 (not via SQLiteCpp), include its directory
-  # ${SQLite3_INCLUDE_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_autogen/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_BINARY_DIR}
+
+
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+  AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/interface
 )
 
 # ONLY FUNCTIONAL ON THE PI WITH THAT EXACT PATH 
+
