@@ -1,10 +1,10 @@
-#include "Scan.h"
-#include "ui_Scan.h"
+#include "scan.h"
+#include "ui_scan.h"
 // Include OpenCV headers if needed
 // #include <opencv2/opencv.hpp>
 
-Scan::Scan(QWidget *parent) 
-    : QWidget(parent), 
+Scan::Scan(QMainWindow *parent) 
+    : QMainWindow(parent), 
       ui(new Ui::Scan) {
     ui->setupUi(this);
 

@@ -1,8 +1,8 @@
-#include "Type.h"
-#include "ui_Type.h"
+#include "type.h"
+#include "ui_type.h"
 
-Type::Type(QWidget *parent) : 
-    QWidget(parent), 
+Type::Type(QMainWindow *parent) : 
+    QMainWindow(parent), 
     ui(new Ui::Type) {
     ui->setupUi(this);
 

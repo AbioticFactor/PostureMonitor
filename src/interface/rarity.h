@@ -1,18 +1,18 @@
 #ifndef RARITIES_H
 #define RARITIES_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QCheckBox>
 
 namespace Ui {
     class Rarities;
 }
 
-class Rarities : public QWidget {
+class Rarities : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit Rarities(QWidget *parent = nullptr);
+    explicit Rarities(QMainWindow *parent = nullptr);
     ~Rarities();
 
 signals:

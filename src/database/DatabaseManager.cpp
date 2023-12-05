@@ -1,10 +1,33 @@
-#include <SQLiteCpp/SQLiteCpp.h>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
+#include <SQLiteCpp/SQLiteCpp.h>
+#include <sqlite3.h>
+
+
+
+
+// using json = nlohmann::json;
 
 class DatabaseManager {
 public:
+
+    struct CardInfo {
+        int id;
+        std::string name;
+        int mana_cost;
+        std::string color;
+        std::string card_type;
+        std::string card_set;
+        std::string rarity;
+        int power;
+        int toughness;
+        std::string artist;
+        int quantity;
+        std::string imagePath;
+    };
+
     DatabaseManager(const std::string& db_name) : dbName(db_name), db(db_name, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
         createTable();
     }
@@ -28,10 +51,14 @@ public:
         db.exec(createTableQuery);
     }
 
+    void bulkUpdate() {
+        
+    }
 
-    void addCard(int id, const std::string& name, int mana_cost, const std::string& color, const std::string& card_type, 
-                const std::string& card_set, const std::string& rarity, int power, int toughness, 
-                const std::string& artist, const std::string& image_path) {
+
+    void addCard(int id, const std::string& name, int mana_cost, const std::string& color, 
+                 const std::string& card_type, const std::string& card_set, const std::string& rarity, 
+                 int power, int toughness, const std::string& artist, const std::string& image_path) {
         SQLite::Statement queryCheck(db, "SELECT quantity FROM cards WHERE id = ?");
         queryCheck.bind(1, id);
         int quantity = 0;
@@ -86,47 +113,68 @@ public:
     }
 
 
-void searchCards(const std::string& keywords, const std::vector<std::string>& rarities,
-                                  const std::vector<std::string>& types, std::vector<int>& manaCosts, const std::vector<std::string>& colors) {
-    std::string query = "SELECT * FROM cards WHERE 1 = 1";
 
-    // Add keyword filter
-    if (!keywords.empty()) {
-        query += " AND name LIKE '%" + keywords + "%'";
-    }
+    std::vector<CardInfo> searchCards(const std::string& keywords, 
+                                      const std::vector<std::string>& rarities,
+                                      const std::vector<std::string>& types, 
+                                      const std::vector<int>& manaCosts, 
+                                      const std::vector<std::string>& colors) {
+        std::vector<CardInfo> cards;
+        std::string query = "SELECT id, name, mana_cost, color, card_type, card_set, rarity, power, toughness, artist, quantity, image_path FROM cards WHERE 1 = 1";
 
-    // Add rarity filter
-    if (!rarities.empty()) {
-        query += " AND rarity IN ('" + join(rarities, "', '") + "')";
-    }
-
-    // Add type filter
-    if (!types.empty()) {
-        query += " AND card_type IN ('" + join(types, "', '") + "')";
-    }
-
-    // Add mana cost filter
-    if (!manaCosts.empty()) {
-        query += " AND mana_cost IN (";
-        for (size_t i = 0; i < manaCosts.size(); ++i) {
-            query += std::to_string(manaCosts[i]);
-            if (i < manaCosts.size() - 1) query += ", ";
+        // Add keyword filter
+        if (!keywords.empty()) {
+            query += " AND name LIKE '%" + keywords + "%'";
         }
-        query += ")";
+
+        // Add rarity filter
+        if (!rarities.empty()) {
+            query += " AND rarity IN ('" + join(rarities, "', '") + "')";
+        }
+
+        // Add type filter
+        if (!types.empty()) {
+            query += " AND card_type IN ('" + join(types, "', '") + "')";
+        }
+
+        // Add mana cost filter
+        if (!manaCosts.empty()) {
+            query += " AND mana_cost IN (";
+            for (size_t i = 0; i < manaCosts.size(); ++i) {
+                query += std::to_string(manaCosts[i]);
+                if (i < manaCosts.size() - 1) {
+                    query += ", ";
+                }
+            }
+            query += ")";
+        }
+
+        // Add color filter
+        if (!colors.empty()) {
+            query += " AND color IN ('" + join(colors, "', '") + "')";
+        }
+
+        SQLite::Statement queryExec(db, query);
+        while (queryExec.executeStep()) {
+            CardInfo card;
+            card.id = queryExec.getColumn(0).getInt();
+            card.name = queryExec.getColumn(1).getString();
+            card.mana_cost = queryExec.getColumn(2).getInt();
+            card.color = queryExec.getColumn(3).getString();
+            card.card_type = queryExec.getColumn(4).getString();
+            card.card_set = queryExec.getColumn(5).getString();
+            card.rarity = queryExec.getColumn(6).getString();
+            card.power = queryExec.getColumn(7).getInt();
+            card.toughness = queryExec.getColumn(8).getInt();
+            card.artist = queryExec.getColumn(9).getString();
+            card.quantity = queryExec.getColumn(10).getInt();
+            card.imagePath = queryExec.getColumn(11).getString();
+            cards.push_back(card);
+        }
+        return cards;
     }
 
-    // Add color filter
-    if (!colors.empty()) {
-        query += " AND color IN ('" + join(colors, "', '") + "')";
-    }
 
-    // Execute the query
-    SQLite::Statement queryExec(db, query);
-    while (queryExec.executeStep()) {
-        // Process each row - for example, print card details
-        std::cout << "Card ID: " << queryExec.getColumn(0) << ", Name: " << queryExec.getColumn(1) << std::endl;
-    }
-}
 
 private:
     std::string dbName;

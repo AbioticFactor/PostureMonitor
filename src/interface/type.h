@@ -1,18 +1,18 @@
 #ifndef TYPE_H
 #define TYPE_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QCheckBox>
 
 namespace Ui {
     class Type;
 }
 
-class Type : public QWidget {
+class Type : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit Type(QWidget *parent = nullptr);
+    explicit Type(QMainWindow *parent = nullptr);
     ~Type();
 
 signals:

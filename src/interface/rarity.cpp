@@ -1,8 +1,8 @@
-#include "Rarities.h"
-#include "ui_Rarities.h"
+#include "rarity.h"
+#include "ui_rarity.h"
 
-Rarities::Rarities(QWidget *parent) : 
-    QWidget(parent), 
+Rarities::Rarities(QMainWindow *parent) : 
+    QMainWindow(parent), 
     ui(new Ui::Rarities) {
     ui->setupUi(this);
 

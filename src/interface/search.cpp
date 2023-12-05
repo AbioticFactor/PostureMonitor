@@ -1,8 +1,8 @@
-#include "Search.h"
-#include "ui_Search.h"
+#include "search.h"
+#include "ui_search.h"
 
-Search::Search(QWidget *parent) 
-    : QWidget(parent), 
+Search::Search(QMainWindow *parent) 
+    : QMainWindow(parent), 
       ui(new Ui::Search) {
     ui->setupUi(this);
 

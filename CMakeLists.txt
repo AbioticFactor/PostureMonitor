@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 
 # Set toolchain for Windows
-if(WIN32)
-  set(CMAKE_TOOLCHAIN_FILE "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg/scripts/buildsystems/vcpkg.cmake"
-    CACHE STRING "Vcpkg toolchain file")
-endif()
-
 project(MTGCollectionManager)
 
 # Set C++17 as the standard and enforce it
@@ -13,6 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Find required packages
 find_package(OpenCV REQUIRED)
@@ -32,16 +28,19 @@ set(CMAKE_AUTORCC ON)
 
 # Recursively find all .cpp and .ui files in the src directory
 file(GLOB_RECURSE SOURCES "src/*.cpp")
-# file(GLOB_RECURSE UI_FILES "src/*.ui")
+message(STATUS "SOURCES: ${SOURCES}")
 
-set(UI_FILES 
-  src/interface/MainMenu.ui
-  src/interface/filter.ui
-  src/interface/rarity.ui
-  src/interface/search.ui
-  src/interface/scan.ui
-  src/interface/type.ui
-)
+file(GLOB_RECURSE UI_FILES "src/*.ui")
+
+# set(UI_FILES 
+#   src/interface/MainWindow.ui
+#   src/interface/filter.ui
+#   src/interface/rarity.ui
+#   src/interface/search.ui
+#   src/interface/scan.ui
+#   src/interface/type.ui
+#   src/interface/collection.ui
+# )
 
 foreach(UI_FILE ${UI_FILES})
   get_filename_component(UI_FILENAME ${UI_FILE} NAME_WE)
@@ -61,7 +60,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   ${OpenCV_LIBS}
   ${Tesseract_LIBRARIES}
   sqlite3  
-  /home/pi/SQLiteCpp/build/libSQLiteCpp.a  
+  /home/pi/SQLiteCpp/build/libSQLiteCpp.a 
+  SQLiteCpp 
   ${PIGPIO_LIBRARY}
   Qt5::Core 
   Qt5::Gui 
@@ -70,6 +70,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 # Include directories for the project
 target_include_directories(${PROJECT_NAME} PRIVATE 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include
   include/common 
   include/cv 
   include/database
@@ -78,14 +79,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   ${Tesseract_INCLUDE_DIRS}
   /home/pi/SQLiteCpp/include
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_autogen/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_SOURCE_DIR}/interface
   ${CMAKE_CURRENT_BINARY_DIR}
-
 
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-  AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/interface
+  AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/interface
 )
 
 # ONLY FUNCTIONAL ON THE PI WITH THAT EXACT PATH 

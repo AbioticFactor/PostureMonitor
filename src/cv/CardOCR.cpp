@@ -115,7 +115,7 @@ public:
     void scan()
     {
         Feeder feeder;
-        DatabaseManager db("test_collection");
+        DatabaseManager db("test_collection.db3");
         bool cardsLeft = true; // handle making this false with timer
         bool scanning = false;
         int waitTime = 10;
@@ -146,7 +146,13 @@ public:
                         // proccess card text
                         auto processedText = cardText;
                         // PLACEHOLDER
-                        db.addCard(1, "Black Lotus", 0, "Colorless", "Artifact", "Alpha", "Rare", 0, 0, "Christopher Rush", "PATH");
+
+                        std::string imagePath = "path/to/save/image_" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".png";
+                        cv::imwrite(imagePath, cardImg);
+
+                        // Add card to database with the saved image path
+                        // db.addCard(1, "Black Lotus", 0, "Colorless", "Artifact", "Alpha", "Rare", 0, 0, "Christopher Rush", imagePath);
+
                         std::this_thread::sleep_for(std::chrono::seconds(newCardWaitTime));
                         feeder.feedCard();
                         continue;

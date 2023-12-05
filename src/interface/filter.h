@@ -1,7 +1,7 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include <QWidget>
+#include <QMainWindow>
 #include <QCheckBox>
 #include <QPushButton>
 #include <QList>
@@ -10,11 +10,11 @@ namespace Ui {
 class Filter;
 }
 
-class Filter : public QWidget {
+class Filter : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit Filter(QWidget *parent = nullptr);
+    explicit Filter(QMainWindow *parent = nullptr);
     ~Filter();
 
 signals:
