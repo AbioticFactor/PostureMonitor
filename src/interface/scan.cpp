@@ -9,7 +9,7 @@ Scan::Scan(QMainWindow *parent)
     ui->setupUi(this);
 
     // Assuming 'label' is the placeholder for the video feed and 'pushButton' is the stop button
-    connect(ui->pushButton, &QPushButton::clicked, this, &Scan::on_stopButton_clicked);
+    connect(ui->stopButton, &QPushButton::clicked, this, &Scan::on_stopButton_clicked);
 
     // Initialize OpenCV capture and display loop here...
 }

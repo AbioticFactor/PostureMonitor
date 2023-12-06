@@ -7,9 +7,9 @@ Search::Search(QMainWindow *parent)
     ui->setupUi(this);
 
     // Connect button signals to respective slots
-    connect(ui->pushButton_2, &QPushButton::clicked, this, &Search::on_searchButton_clicked);
-    connect(ui->pushButton, &QPushButton::clicked, this, &Search::on_editFiltersButton_clicked);
-    connect(ui->pushButton_3, &QPushButton::clicked, this, &Search::on_backButton_clicked);
+    connect(ui->searchButton, &QPushButton::clicked, this, &Search::on_searchButton_clicked);
+    connect(ui->editFiltersButton, &QPushButton::clicked, this, &Search::on_editFiltersButton_clicked);
+    connect(ui->backButton, &QPushButton::clicked, this, &Search::on_backButton_clicked);
 }
 
 Search::~Search() {

@@ -7,15 +7,10 @@
 
 class Feeder {
 public:
-    Feeder();
-    ~Feeder();
-
     void feedCard();
-    std::pair<cv::Mat, cv::Mat> captureCard();
     void stop();
 
 private:
-    cv::VideoCapture capFace, capBack;
     int motorPin;
 };
 

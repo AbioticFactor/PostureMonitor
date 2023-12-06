@@ -20,7 +20,7 @@ Type::Type(QMainWindow *parent) :
     };
 
     // Connect the OK button signal to the respective slot
-    connect(ui->pushButton, &QPushButton::clicked, this, &Type::on_okButton_clicked);
+    connect(ui->okButton, &QPushButton::clicked, this, &Type::on_okButton_clicked);
 }
 
 Type::~Type() {

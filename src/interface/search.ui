@@ -24,7 +24,7 @@
      </rect>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="editFiltersButton">
     <property name="geometry">
      <rect>
       <x>180</x>
@@ -37,7 +37,7 @@
      <string>Edit Filters</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="searchButton">
     <property name="geometry">
      <rect>
       <x>20</x>
@@ -50,7 +50,7 @@
      <string>Search</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="backButton">
     <property name="geometry">
      <rect>
       <x>20</x>

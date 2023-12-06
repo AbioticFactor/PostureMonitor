@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_VERBOSE_MAKEFILE ON)
+# set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Find required packages
 find_package(OpenCV REQUIRED)
@@ -71,22 +71,21 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 # Include directories for the project
 target_include_directories(${PROJECT_NAME} PRIVATE 
   ${CMAKE_CURRENT_SOURCE_DIR}/include
-  include/common 
-  include/cv 
-  include/database
-  include/feeder
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/common 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/cv 
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/database
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/feeder
   ${OpenCV_INCLUDE_DIRS}
   ${Tesseract_INCLUDE_DIRS}
   /home/pi/SQLiteCpp/include
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_autogen/include
-  ${CMAKE_CURRENT_SOURCE_DIR}/interface
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/interface
   ${CMAKE_CURRENT_BINARY_DIR}
 
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES
-  AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/interface
+  AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/src/interface
 )
 
 # ONLY FUNCTIONAL ON THE PI WITH THAT EXACT PATH 
-

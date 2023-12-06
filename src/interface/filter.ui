@@ -221,7 +221,7 @@
      <string>Multi-colored</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton">
+   <widget class="QPushButton" name="rarityButton">
     <property name="geometry">
      <rect>
       <x>220</x>
@@ -234,7 +234,7 @@
      <string>Rarity</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_2">
+   <widget class="QPushButton" name="typesButton">
     <property name="geometry">
      <rect>
       <x>220</x>
@@ -247,7 +247,7 @@
      <string>Types</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="pushButton_3">
+   <widget class="QPushButton" name="okButton">
     <property name="geometry">
      <rect>
       <x>210</x>

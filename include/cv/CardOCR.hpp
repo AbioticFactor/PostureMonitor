@@ -9,8 +9,6 @@
 
 class CardOCR {
 public:
-    CardOCR();
-    ~CardOCR();
 
     std::string getCardInfo(std::string imPath);
 

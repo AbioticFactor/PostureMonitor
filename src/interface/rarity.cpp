@@ -16,7 +16,7 @@ Rarities::Rarities(QMainWindow *parent) :
     };
 
     // Connect the OK button signal to the respective slot
-    connect(ui->pushButton, &QPushButton::clicked, this, &Rarities::on_okButton_clicked);
+    connect(ui->okButton, &QPushButton::clicked, this, &Rarities::on_okButton_clicked);
 }
 
 Rarities::~Rarities() {

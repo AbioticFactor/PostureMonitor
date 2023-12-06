@@ -9,10 +9,9 @@ Filter::Filter(QMainWindow *parent) :
     ui(new Ui::Filter) {
     ui->setupUi(this); // Set up the UI elements based on the XML
 
-    // Connect the signals from the checkboxes and buttons to their respective slots
-    connect(ui->pushButton, &QPushButton::clicked, this, &Filter::on_rarityButton_clicked);
-    connect(ui->pushButton_2, &QPushButton::clicked, this, &Filter::on_typesButton_clicked);
-    connect(ui->pushButton_3, &QPushButton::clicked, this, &Filter::on_okButton_clicked);
+    connect(ui->rarityButton, &QPushButton::clicked, this, &Filter::on_rarityButton_clicked);
+    connect(ui->typesButton, &QPushButton::clicked, this, &Filter::on_typesButton_clicked);
+    connect(ui->okButton, &QPushButton::clicked, this, &Filter::on_okButton_clicked);
     // DatabaseManager db("test_collection");
 }
 
