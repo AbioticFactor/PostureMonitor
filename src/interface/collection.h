@@ -1,20 +1,21 @@
 #ifndef COLLECTION_H
 #define COLLECTION_H
 
-#include <QMainWindow>
+#include <QWidget>
 
-//#include "MainWindow.h"
+// #include "MainWindow.h"
 
-namespace Ui {
-class Collection;
+namespace Ui
+{
+    class Collection;
 }
 
-class Collection : public QMainWindow
+class Collection : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit Collection(QMainWindow *parent = nullptr);
+    explicit Collection(QWidget *parent = nullptr);
     ~Collection();
 
 signals:
@@ -25,11 +26,10 @@ private slots:
 
 private:
     Ui::Collection *ui;
-    //MainWindow *mainWindow;
+    // MainWindow *mainWindow;
 
     void loadImages();
     std::vector<std::string> convertQStringList(const QStringList &list);
-    
 };
 
 #endif // COLLECTION_H

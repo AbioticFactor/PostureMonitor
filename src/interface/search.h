@@ -1,17 +1,19 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#include <QMainWindow>
+#include <QWidget>
 
-namespace Ui {
+namespace Ui
+{
     class Search;
 }
 
-class Search : public QMainWindow {
+class Search : public QWidget
+{
     Q_OBJECT
 
 public:
-    explicit Search(QMainWindow *parent = nullptr);
+    explicit Search(QWidget *parent = nullptr);
     ~Search();
 
 signals:

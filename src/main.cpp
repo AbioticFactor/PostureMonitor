@@ -1,13 +1,9 @@
-#include "/home/pi/mtg-collection-manager/src/interface/MainWindow.h"
+#include "MainWindow.h"
 #include <QApplication>
 #include <iostream>
 #include <string>
 #include <chrono>
 #include <QTimer>
-
-
-
-
 
 int main(int argc, char *argv[])
 {
@@ -24,12 +20,8 @@ int main(int argc, char *argv[])
 
     // Create and display the main window
     MainWindow w;
-    std::cout << "Initiating boot sequence2" << std::endl;
     w.show();
-
-    
 
     // Start the Qt event loop
     return a.exec();
-
 }

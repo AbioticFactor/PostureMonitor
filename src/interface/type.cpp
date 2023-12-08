@@ -1,9 +1,10 @@
 #include "type.h"
 #include "ui_type.h"
+#include <QTimer>
 
-Type::Type(QMainWindow *parent) : 
-    QMainWindow(parent), 
-    ui(new Ui::Type) {
+Type::Type(QWidget *parent) : QWidget(parent),
+                              ui(new Ui::Type)
+{
     ui->setupUi(this);
 
     // Initialize the list of checkboxes
@@ -20,17 +21,27 @@ Type::Type(QMainWindow *parent) :
     };
 
     // Connect the OK button signal to the respective slot
-    connect(ui->okButton, &QPushButton::clicked, this, &Type::on_okButton_clicked);
+    // connect(ui->okButton, &QPushButton::clicked, this, &Type::on_okButton_clicked);
 }
 
-Type::~Type() {
+Type::~Type()
+{
     delete ui;
 }
 
-void Type::on_okButton_clicked() {
+void Type::on_okButton_clicked()
+{
+    ui->okButton->setEnabled(false);
+
+    // Re-enable the button after 500 ms
+    QTimer::singleShot(500, [this]()
+                       { ui->okButton->setEnabled(true); });
+    QStringList selectedRarities;
     QStringList selectedTypes;
-    for (QCheckBox *checkBox : typeCheckBoxes) {
-        if (checkBox->isChecked()) {
+    for (QCheckBox *checkBox : typeCheckBoxes)
+    {
+        if (checkBox->isChecked())
+        {
             selectedTypes.append(checkBox->text());
         }
     }

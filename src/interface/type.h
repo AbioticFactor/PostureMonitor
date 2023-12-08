@@ -1,18 +1,20 @@
 #ifndef TYPE_H
 #define TYPE_H
 
-#include <QMainWindow>
+#include <QWidget>
 #include <QCheckBox>
 
-namespace Ui {
+namespace Ui
+{
     class Type;
 }
 
-class Type : public QMainWindow {
+class Type : public QWidget
+{
     Q_OBJECT
 
 public:
-    explicit Type(QMainWindow *parent = nullptr);
+    explicit Type(QWidget *parent = nullptr);
     ~Type();
 
 signals:
@@ -23,7 +25,7 @@ private slots:
 
 private:
     Ui::Type *ui;
-    QList<QCheckBox*> typeCheckBoxes;
+    QList<QCheckBox *> typeCheckBoxes;
 };
 
 #endif // TYPE_H

@@ -2,66 +2,82 @@
 #include "ui_collection.h"
 #include <QLabel>
 #include <QVBoxLayout>
-#include <database/DatabaseManager.hpp>
-#include "/home/pi/mtg-collection-manager/include/feeder/Feeder.hpp"
-//#include "MainWindow.h"
+#include <QScrollArea>
 
-
-
-Collection::Collection(QMainWindow *parent)
-    : QMainWindow(parent),
-      ui(new Ui::Collection) {
+Collection::Collection(QWidget *parent)
+    : QWidget(parent),
+      ui(new Ui::Collection)
+{
     ui->setupUi(this);
 
     connect(ui->doneButton, &QPushButton::clicked, this, &Collection::on_doneButton_clicked);
 }
 
-
-Collection::~Collection() {
+Collection::~Collection()
+{
     delete ui;
 }
 
-void Collection::on_doneButton_clicked() {
+void Collection::on_doneButton_clicked()
+{
     emit backRequested();
 }
 
-void Collection::loadImages() {
-    // if (!mainWindow) return; // Check if mainWindow is valid
+void Collection::loadImages()
+{
 
-    // Feeder feeder;
-    // DatabaseManager db("test_collection.db3");
+    Feeder feeder;
+    DatabaseManager db("test_collection.db3");
 
+    // Convert QString and QStringList to std::string and std::vector<std::string>
+    std::string keywords = currentCriteria.keywords.toStdString();
+    std::vector<std::string> rarities = convertQStringList(currentCriteria.rarities);
+    std::vector<std::string> types = convertQStringList(currentCriteria.types);
+    std::vector<std::string> colors = convertQStringList(currentCriteria.colors);
+    std::vector<int> manaCosts(currentCriteria.manaCosts.begin(), currentCriteria.manaCosts.end()); // Convert QList<int> to std::vector<int>
 
-    // auto &criteria = mainWindow->currentCriteria; // Access currentCriteria from mainWindow
+    db.addCard(1, "Black Lotus", 0, "Colorless", "Artifact", "Alpha", "Rare", 0, 0, "Christopher Rush", "/home/pi/mtg-collection-manager/src/cv/img1.jpg");
 
-    // // Convert QString and QStringList to std::string and std::vector<std::string>
-    // std::string keywords = criteria.keywords.toStdString();
-    // std::vector<std::string> rarities = convertQStringList(criteria.rarities);
-    // std::vector<std::string> types = convertQStringList(criteria.types);
-    // std::vector<std::string> colors = convertQStringList(criteria.colors);
-    // std::vector<int> manaCosts(criteria.manaCosts.begin(), criteria.manaCosts.end()); // Convert QList<int> to std::vector<int>
+    // std::vector<DatabaseManager::CardInfo> cards = db.searchCards(keywords, rarities, types, manaCosts, colors);
+    std::vector<DatabaseManager::CardInfo> cards; // Get this data from your database manager
 
-    // db.addCard(1, "Black Lotus", 0, "Colorless", "Artifact", "Alpha", "Rare", 0, 0, "Christopher Rush", "gg");
+    QVBoxLayout *layout = new QVBoxLayout();
+    for (const auto &card : cards)
+    {
+        QPixmap pixmap(QString::fromStdString(card.imagePath));
+        QLabel *imageLabel = new QLabel();
+        imageLabel->setPixmap(pixmap.scaled(50, 50, Qt::KeepAspectRatio));
+        layout->addWidget(imageLabel);
+    }
 
-    // // std::vector<DatabaseManager::CardInfo> cards = db.searchCards(keywords, rarities, types, manaCosts, colors);
-    // std::vector<DatabaseManager::CardInfo> cards;
+    // Create a container widget and set the layout
+    QWidget *container = new QWidget();
+    container->setLayout(layout);
 
+    // Create a scroll area to hold the container
+    QScrollArea *scrollArea = new QScrollArea(this);
+    scrollArea->setWidget(container);
+    scrollArea->setWidgetResizable(true); // Make the scroll area resizable
 
-    // QVBoxLayout *layout = new QVBoxLayout();
-    // for (const auto& card : cards) {
-    //     QPixmap pixmap(QString::fromStdString(card.imagePath));
-    //     QLabel *imageLabel = new QLabel(this);
-    //     imageLabel->setPixmap(pixmap.scaled(50, 50, Qt::KeepAspectRatio));
-    //     layout->addWidget(imageLabel);
-    // }
-    // QWidget *container = new QWidget();
-    // container->setLayout(layout);
-    // setCentralWidget(container); 
+    // Instead of setCentralWidget, you add the scrollArea to the main layout of the Collection widget
+    QVBoxLayout *mainLayout = new QVBoxLayout(this); // 'this' ensures the layout is set on the current instance
+    mainLayout->addWidget(scrollArea);
+
+    // Set the main layout as the layout of the Collection widget
+    this->setLayout(mainLayout);
 }
 
-std::vector<std::string> Collection::convertQStringList(const QStringList &list) {
+void Collection::setSearchCriteria(const Collection::SearchCriteria &criteria)
+{
+    currentCriteria = criteria;
+    loadImages(); // Assuming loadImages uses currentCriteria to load images
+}
+
+std::vector<std::string> Collection::convertQStringList(const QStringList &list)
+{
     std::vector<std::string> result;
-    for (const auto &item : list) {
+    for (const auto &item : list)
+    {
         result.push_back(item.toStdString());
     }
     return result;

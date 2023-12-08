@@ -4,15 +4,17 @@
 #include <QMainWindow>
 #include <QCheckBox>
 
-namespace Ui {
+namespace Ui
+{
     class Rarities;
 }
 
-class Rarities : public QMainWindow {
+class Rarities : public QWidget
+{
     Q_OBJECT
 
 public:
-    explicit Rarities(QMainWindow *parent = nullptr);
+    explicit Rarities(QWidget *parent = nullptr);
     ~Rarities();
 
 signals:
@@ -23,7 +25,7 @@ private slots:
 
 private:
     Ui::Rarities *ui;
-    QList<QCheckBox*> rarityCheckBoxes;
+    QList<QCheckBox *> rarityCheckBoxes;
 };
 
 #endif // RARITIES_H

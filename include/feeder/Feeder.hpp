@@ -1,16 +1,21 @@
 #pragma once
-#include <iostream>
-#include <chrono>
-#include <thread>
-#include <utility>
-#include <opencv2/opencv.hpp>
 
-class Feeder {
+#include <iostream>
+#include <QObject>
+
+class Feeder : public QObject {
+    Q_OBJECT
+
 public:
+    Feeder();
+    ~Feeder();
+
+public slots:
     void feedCard();
     void stop();
 
 private:
-    int motorPin;
+    const int SERVO;
+    const int pwmDispense;
+    const int pwmNeutral;
 };
-

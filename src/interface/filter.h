@@ -1,26 +1,28 @@
 #ifndef FILTER_H
 #define FILTER_H
 
-#include <QMainWindow>
+#include <QWidget>
 #include <QCheckBox>
 #include <QPushButton>
 #include <QList>
 
-namespace Ui {
-class Filter;
+namespace Ui
+{
+    class Filter;
 }
 
-class Filter : public QMainWindow {
+class Filter : public QWidget
+{
     Q_OBJECT
 
 public:
-    explicit Filter(QMainWindow *parent = nullptr);
+    explicit Filter(QWidget *parent = nullptr);
     ~Filter();
 
 signals:
     void navigateToRarityScreen();
     void navigateToTypeScreen();
-    void filtersUpdated(const QList<int>& manaCosts, const QList<QString>& colors);
+    void filtersUpdated(const QList<int> &manaCosts, const QList<QString> &colors);
 
 private slots:
     void on_okButton_clicked();
@@ -30,8 +32,8 @@ private slots:
 private:
     Ui::Filter *ui;
 
-    void gatherManaCosts(QList<int>& manaCosts);
-    void gatherColors(QList<QString>& colors);
+    void gatherManaCosts(QList<int> &manaCosts);
+    void gatherColors(QList<QString> &colors);
 };
 
 #endif // FILTER_H

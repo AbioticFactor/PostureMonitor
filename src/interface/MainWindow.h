@@ -9,29 +9,33 @@
 #include "scan.h"
 #include "search.h"
 #include "type.h"
+#include "MainMenu.h"
 
 // Include headers for other screens
 
-namespace Ui {
+namespace Ui
+{
     class MainWindow;
 }
 
-class MainWindow : public QMainWindow {
+class MainWindow : public QMainWindow
+{
     Q_OBJECT
 
 public:
     explicit MainWindow(QMainWindow *parent = nullptr);
 
-    struct SearchCriteria {
-        QString keywords; // User-inputted search keywords
+    struct SearchCriteria
+    {
+        QString keywords;     // User-inputted search keywords
         QStringList rarities; // Selected rarities for filtering
-        QStringList types; // Selected card types for filtering
+        QStringList types;    // Selected card types for filtering
         QList<int> manaCosts; // Selected mana costs for filtering, changed from QStringList to QList<int>
-        QStringList colors; // Selected colors for filtering
+        QStringList colors;   // Selected colors for filtering
     };
 
     SearchCriteria currentCriteria;
-    
+
     ~MainWindow();
 
 signals:
@@ -44,21 +48,17 @@ public slots:
     void showEditFiltersScreen();
     void applyRaritiesFilter(const QStringList &rarities);
     void applyTypeFilter(const QStringList &types);
-    void applyCostColorFilter(const QList<int>& manaCosts, const QList<QString>& colors); // If you have such a slot
+    void applyCostColorFilter(const QList<int> &manaCosts, const QList<QString> &colors); // If you have such a slot
     void performSearch();
     void showCollectionScreen();
-
-private slots:
-    void on_scanButton_clicked();
-    void on_searchCollectionButton_clicked();
-    void on_updatePricesButton_clicked();
 
 private:
     Ui::MainWindow *ui;
     QStackedWidget stackedWidget;
 
     // Enum for stacked widget indices
-    enum ScreenIndices {
+    enum ScreenIndices
+    {
         MainWindowIndex,
         ScanScreenIndex,
         SearchScreenIndex,
@@ -68,7 +68,6 @@ private:
         CollectionScreenIndex
         // Add other screen indices as needed
     };
-
 };
 
 #endif // MainWindow_H

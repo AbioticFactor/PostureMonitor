@@ -1,44 +1,41 @@
 #pragma once
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <SQLiteCpp/SQLiteCpp.h>
-
-
+#include <nlohmann/json.hpp>
 
 class DatabaseManager {
 public:
-
     struct CardInfo {
-        int id;
         std::string name;
-        int mana_cost;
+        std::string mana_cost;
         std::string color;
         std::string card_type;
-        std::string card_set;
         std::string rarity;
-        int power;
-        int toughness;
-        std::string artist;
-        int quantity;
         std::string imagePath;
     };
 
     DatabaseManager(const char* db_name);
     void createTable();
-    void addCard(int id, const std::string& name, int mana_cost, const std::string& color, 
-                 const std::string& card_type, const std::string& card_set, const std::string& rarity, 
-                 int power, int toughness, const std::string& artist, const std::string& image_path);
-    void deleteCard(int card_id);
     void bulkUpdate();
-    std::vector<CardInfo> searchCards(const std::string& keywords, 
-                                      const std::vector<std::string>& rarities,
-                                      const std::vector<std::string>& types, 
-                                      const std::vector<int>& manaCosts, 
+    void findAndAddMostSimilarCard(const std::string& inputCardName, const std::string& imagePath);
+
+    void addCard(const std::string& name, const std::string& mana_cost,
+                 const std::string& color, const std::string& card_type,
+                 const std::string& rarity, const std::string& image_path);
+    void deleteCard(int card_id);
+    std::vector<CardInfo> searchCards(const std::vector<std::string>& rarities,
+                                      const std::vector<std::string>& types,
+                                      const std::vector<int>& manaCosts,
                                       const std::vector<std::string>& colors);
 
 private:
-    const char* dbName;
+    std::string dbName;
     SQLite::Database db;
+
     std::string join(const std::vector<std::string>& elements, const std::string& delimiter);
+    int levenshteinDistance(const std::string &s1, const std::string &s2);
+
 };
