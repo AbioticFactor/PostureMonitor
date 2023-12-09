@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QCheckBox>
+#include <QWidget>
 
 namespace Ui
 {

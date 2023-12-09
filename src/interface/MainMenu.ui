@@ -13,14 +13,12 @@
   <property name="windowTitle">
    <string>MainMenu</string>
   </property>
-
-  <!-- Scan Button -->
   <widget class="QPushButton" name="scanButton">
    <property name="geometry">
     <rect>
      <x>20</x>
      <y>30</y>
-     <width>141</width>
+     <width>131</width>
      <height>181</height>
     </rect>
    </property>
@@ -28,37 +26,33 @@
     <string>Scan</string>
    </property>
   </widget>
-
-  <!-- Search Collection Button -->
   <widget class="QPushButton" name="searchCollectionButton">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>170</x>
      <y>90</y>
-     <width>111</width>
+     <width>131</width>
      <height>121</height>
     </rect>
    </property>
    <property name="text">
-    <string>Search Collection</string>
+    <string>Search 
+Collection</string>
    </property>
   </widget>
-
-  <!-- Update Prices Button -->
-  <widget class="QPushButton" name="updatePricesButton">
+  <widget class="QPushButton" name="EmailButton">
    <property name="geometry">
     <rect>
-     <x>190</x>
+     <x>170</x>
      <y>30</y>
-     <width>111</width>
+     <width>131</width>
      <height>41</height>
     </rect>
    </property>
    <property name="text">
-    <string>Update prices</string>
+    <string>Email</string>
    </property>
   </widget>
-
  </widget>
  <resources/>
  <connections/>

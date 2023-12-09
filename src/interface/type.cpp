@@ -20,8 +20,6 @@ Type::Type(QWidget *parent) : QWidget(parent),
         ui->checkBox_9  // Land
     };
 
-    // Connect the OK button signal to the respective slot
-    // connect(ui->okButton, &QPushButton::clicked, this, &Type::on_okButton_clicked);
 }
 
 Type::~Type()

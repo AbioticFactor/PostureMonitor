@@ -2,6 +2,7 @@
 #define SEARCH_H
 
 #include <QWidget>
+#include <QTimer>
 
 namespace Ui
 {
@@ -17,7 +18,7 @@ public:
     ~Search();
 
 signals:
-    void searchRequested(const QString &keywords);
+    void searchRequested();
     void editFilters();
     void backRequested();
 

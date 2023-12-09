@@ -1,5 +1,6 @@
 #include "MainMenu.h"
 #include "ui_MainMenu.h"
+#include <QTimer>
 
 MainMenu::MainMenu(QWidget *parent)
     : QWidget(parent),
@@ -38,12 +39,12 @@ void MainMenu::on_searchCollectionButton_clicked()
   emit searchCollectionClicked(); // Emit signal to indicate filter editing is requested
 }
 
-void MainMenu::on_updatePricesButton_clicked()
+void MainMenu::on_EmailButton_clicked()
 {
-  ui->updatePricesButton->setEnabled(false);
+  ui->EmailButton->setEnabled(false);
 
   // Re-enable the button after 500 ms
   QTimer::singleShot(500, [this]()
-                     { ui->updatePricesButton->setEnabled(true); });
-  emit updatePricesClicked(); // Emit signal to navigate back to the main menu
+                     { ui->EmailButton->setEnabled(true); });
+  emit EmailClicked(); // Emit signal to navigate back to the main menu
 }

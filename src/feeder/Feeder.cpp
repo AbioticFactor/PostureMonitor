@@ -11,7 +11,6 @@ Feeder::Feeder()
     }
     gpioServo(SERVO, pwmNeutral);
     std::cout << "Motors online" << std::endl;
-    std::cout << "All systems online" << std::endl;
 }
 
 Feeder::~Feeder()
@@ -24,6 +23,7 @@ void Feeder::feedCard()
     gpioServo(SERVO, pwmDispense);
     QTimer::singleShot(1300, this, [this]()
                        { stop(); });
+    
 }
 
 void Feeder::stop()

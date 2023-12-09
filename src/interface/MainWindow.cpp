@@ -1,65 +1,70 @@
-#include "MainWindow.h"
-#include "ui_MainWindow.h"
+#include <QWidget> 
+#include <QStackedWidget>
+#include <QTimer>
+#include <QVBoxLayout> 
+#include <QApplication>
+#include <iostream>
+#include <vector> 
+#include <QStringList>
 
-MainWindow::MainWindow(QWidget *parent)
-    : QWidget(parent),
+#include "ui_MainWindow.h" 
+#include <MainWindow.h>
+#include "MainMenu.h"
+#include "filter.h"
+#include "scan.h"
+#include "search.h"
+#include "rarity.h"
+#include "type.h"
+#include "collection.h"
+#include "CardOCR.hpp"
+#include <pigpio.h>
+
+#include <fstream>
+
+
+MainWindow::MainWindow(QMainWindow *parent)
+    : QMainWindow(parent),
       ui(new Ui::MainWindow),
-      stackedWidget(new QStackedWidget())
+      stackedWidget(new QStackedWidget(this)),
+      dbManager(new DatabaseManager("collection.db3")),
+      cardOCR(new CardOCR()),
+      feeder(new Feeder()),
+      processTimer(new QTimer()),
+      feedTimer(new QTimer())
+
 {
+
+
 
     std::cout << "about to ui arrow setup" << std::endl;
 
     ui->setupUi(this);
     std::cout << "setup ui" << std::endl;
 
-    // stackedWidget->addWidget(this);
+
+    // stackedWidget.addWidget(this);
     MainMenu *mainMenuScreen = new MainMenu(this);
     Filter *filterScreen = new Filter(this);
-    std::cout << "about to fs" << std::endl;
-    Scan *scan = new Scan(this);
-    std::cout << "scan" << std::endl;
+    Scan *scanScreen = new Scan(this);
     Search *searchScreen = new Search(this);
-    std::cout << "ss" << std::endl;
     Rarities *raritiesScreen = new Rarities(this);
-    std::cout << "rara" << std::endl;
     Type *typeScreen = new Type(this);
-    std::cout << "teetee" << std::endl;
     Collection *collectionScreen = new Collection(this);
-    std::cout << "col" << std::endl;
 
-    // Initialize the stackedWidget with various screens
-    stackedWidget->addWidget(mainMenuScreen);
-    stackedWidget->addWidget(filterScreen);
-    std::cout << "widg filter" << std::endl;
-    stackedWidget->addWidget(scan);
-    std::cout << "widg scan" << std::endl;
-    stackedWidget->addWidget(searchScreen);
-    std::cout << "widg search" << std::endl;
-    stackedWidget->addWidget(raritiesScreen);
-    std::cout << "widg rare" << std::endl;
-    stackedWidget->addWidget(typeScreen);
-    std::cout << "widg teetee" << std::endl;
-    stackedWidget->addWidget(collectionScreen);
-    std::cout << "widg col" << std::endl;
+
+    // Initialize the stackedWidget with screens
+    stackedWidget.addWidget(mainMenuScreen);
+    stackedWidget.addWidget(scanScreen);
+    stackedWidget.addWidget(searchScreen);
+    stackedWidget.addWidget(raritiesScreen);
+    stackedWidget.addWidget(typeScreen);
+    stackedWidget.addWidget(filterScreen);
+    stackedWidget.addWidget(collectionScreen);
 
     std::cout << "added widgets" << std::endl;
-
-    stackedWidget->setCurrentIndex(MainMenuIndex);
-    std::cout << "MAIN WINDOW INDEX" << MainMenuIndex << std::endl;
-
-    // Connect signals from buttons to slots within this class
-    QLayout *existingLayout = this->layout();
-    if (existingLayout)
-    {
-        existingLayout->addWidget(stackedWidget);
-    }
-    else
-    {
-        // Fallback: If no layout exists, create a new one
-        QVBoxLayout *layout = new QVBoxLayout(this);
-        layout->addWidget(stackedWidget);
-        setLayout(layout);
-    }
+    
+    stackedWidget.setCurrentIndex(MainMenuIndex);
+    setCentralWidget(&stackedWidget);
 
     // MainWindow
     connect(this, &MainWindow::searchCriteriaChanged, collectionScreen, &Collection::setSearchCriteria);
@@ -69,7 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     // MainMenu buttons
     connect(mainMenuScreen, &MainMenu::scanClicked, this, &MainWindow::on_scanButton_clicked);
     connect(mainMenuScreen, &MainMenu::searchCollectionClicked, this, &MainWindow::on_searchCollectionButton_clicked);
-    connect(mainMenuScreen, &MainMenu::updatePricesClicked, this, &MainWindow::on_updatePricesButton_clicked);
+    connect(mainMenuScreen, &MainMenu::EmailClicked, this, &MainWindow::on_EmailButton_clicked);
 
     // Search screen buttons
     connect(searchScreen, &Search::searchRequested, this, &MainWindow::performSearch);
@@ -82,8 +87,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(filterScreen, &Filter::filtersUpdated, this, &MainWindow::applyCostColorFilter);
 
     // Scan screen
-    connect(scan, &Scan::stopClicked, this, &MainWindow::showMainMenuScreen);
-    connect(scan, &Scan::switchToCollectionView, this, &MainWindow::showCollectionScreen);
+    connect(scanScreen, &Scan::stopClicked, cardOCR, &CardOCR::handleStopScanning);
+    connect(scanScreen, &Scan::stopClicked, this, &MainWindow::showCollectionScreen);
+
+    
+    connect(scanScreen, &Scan::switchToCollectionView, this, &MainWindow::showCollectionScreen);
 
     // Rarities screen
     connect(raritiesScreen, &Rarities::raritiesSelected, this, &MainWindow::applyRaritiesFilter);
@@ -94,127 +102,134 @@ MainWindow::MainWindow(QWidget *parent)
     // Collection screen
     connect(collectionScreen, &Collection::backRequested, this, &MainWindow::showMainMenuScreen);
 
+    // Card OCR
+    // connect(cardOCR, &CardOCR::frameProcessed, scanScreen, &Scan::displayFrame);
+    // connect(cardOCR, &CardOCR::finishedScanning, scanScreen, &Scan::onFinishedScanning);
+
+    //Card OCR feeder
+    connect(cardOCR, &CardOCR::feedCardRequested, this, &MainWindow::feedCard);
+    connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::feedCard);
+    connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::startProcessTimer);
+
+    
+    
+    // I HIGHLY DOUBT THIS WORKS
+
     std::cout << "connected it all" << std::endl;
 
-    QTimer processTimer;
-    QTimer feedTimer;
+    // processTimer->setSingleShot(true);
+
+    connect(processTimer, &QTimer::timeout, this, &MainWindow::onProcessTimerTimeout);
+
+    
+
+
+
     
 }
 
 MainWindow::~MainWindow()
 {
+    gpioTerminate();
     delete ui;
 }
 
 void MainWindow::on_scanButton_clicked()
 {
-    // Switch to the scan screen and start scanning
-    stackedWidget->setCurrentIndex(ScanScreenIndex);
+    stackedWidget.setCurrentIndex(ScanScreenIndex);
 
-    // Create the objects
-    CardOCR *cardOCR = new CardOCR(); // this should probably be a member variable
-    Scan *scan = new Scan();          // this should probably be a member variable or already exist in your stackedWidget
-    connect(cardOCR, &CardOCR::frameProcessed, scan, &Scan::displayFrame);
-    connect(cardOCR, &CardOCR::finishedScanning, scan, &Scan::onFinishedScanning);
-    cardOCR->start(); // Start the thread
 
-    // Move cardOCR to a new thread
-    // QThread* thread = new QThread(this);
-    // cardOCR->moveToThread(thread);
-
-    // // Connect the finished signal from the thread to deleteLater slots to clean up
-    // connect(thread, &QThread::finished, cardOCR, &QObject::deleteLater);
-    // connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-
-    // // Connect the frameProcessed signal to the displayFrame slot
-    // connect(cardOCR, &CardOCR::frameProcessed, scan, &Scan::displayFrame);
-
-    // // Connect a signal to start the scan to the thread's started signal
-    // connect(thread, &QThread::started, cardOCR, &CardOCR::scan);
-
-    // // Start the thread
-    // thread->start();
-
-    // Start scanning...
+    cardOCR->start(); 
 }
 
 void MainWindow::on_searchCollectionButton_clicked()
 {
     // Switch to the search collection screen
-    stackedWidget->setCurrentIndex(SearchScreenIndex);
+    stackedWidget.setCurrentIndex(SearchScreenIndex);
 }
 
 void MainWindow::showMainMenuScreen()
 {
-    stackedWidget->setCurrentIndex(MainMenuIndex);
+    stackedWidget.setCurrentIndex(MainMenuIndex);
 }
 
-void MainWindow::on_updatePricesButton_clicked()
-{
-    // Handle updating prices
-    // This might involve API calls, database updates, etc.
+void MainWindow::on_EmailButton_clicked() {
+    std::vector<std::string> rarities = convertQStringList(currentCriteria.rarities);
+    std::vector<std::string> types = convertQStringList(currentCriteria.types);
+    std::vector<std::string> colors = convertQStringList(currentCriteria.colors);
+    std::vector<int> manaCosts(currentCriteria.manaCosts.begin(), currentCriteria.manaCosts.end());
+
+    // std::vector<DatabaseManager::CardInfo> cards = db.searchCards(keywords, rarities, types, manaCosts, colors);
+    auto cards = dbManager->searchCards(rarities, types, manaCosts, colors, true);
+    cards = dbManager->getAllCards(false);
+
+    std::string data;
+    for (const auto& card : cards) {
+        std::cout << card.name << std::endl;
+        data += card.name + ", " + std::to_string(card.mana_cost) + ", " + card.color + "\n"; // etc.
+    }
+    std::ofstream file("/home/pi/mtg-collection-manager/data.csv");
+    file << data;
+    file.close();
+
+    std::string command = "echo 'Your card collection data' | mpack  -s 'Database Data' /home/pi/mtg-collection-manager/data.csv aoa34@cornell.edu";
+    system(command.c_str());
+
+    // remove("/home/pi/mtg-collection-manager/data.csv");
 }
 
 void MainWindow::applyRaritiesFilter(const QStringList &rarities)
 {
-    // Use the selected rarities to filter the search results
-    // This might involve updating a query or filter settings
     currentCriteria.rarities = rarities;
-    stackedWidget->setCurrentIndex(FilterScreenIndex);
+    stackedWidget.setCurrentIndex(FilterScreenIndex);
 }
 
 void MainWindow::applyTypeFilter(const QStringList &types)
 {
-    // Use the selected types to filter the search results
-    // This might involve updating a query or filter settings
+
     currentCriteria.types = types;
-    stackedWidget->setCurrentIndex(FilterScreenIndex);
+    stackedWidget.setCurrentIndex(FilterScreenIndex);
 }
 
 void MainWindow::showRarityScreen()
 {
-    stackedWidget->setCurrentIndex(RarityScreenIndex);
+    stackedWidget.setCurrentIndex(RarityScreenIndex);
 }
 
 void MainWindow::showTypeScreen()
 {
-    // Logic to display the type screen
-    stackedWidget->setCurrentIndex(TypeScreenIndex);
+    stackedWidget.setCurrentIndex(TypeScreenIndex);
 }
 
 void MainWindow::showEditFiltersScreen()
 {
-    // Logic to display the edit filters screen
-    stackedWidget->setCurrentIndex(FilterScreenIndex);
+    stackedWidget.setCurrentIndex(FilterScreenIndex);
 }
 
 void MainWindow::showCollectionScreen()
 {
-    stackedWidget->setCurrentIndex(CollectionScreenIndex);
+    stackedWidget.setCurrentIndex(CollectionScreenIndex);
 }
 
 void MainWindow::applyCostColorFilter(const QList<int> &manaCosts, const QList<QString> &colors)
 {
-    // Logic to apply cost and color filters
-    // Update currentCriteria or other relevant data structures with these filters
+
     currentCriteria.manaCosts = manaCosts;
     currentCriteria.colors = colors;
-    stackedWidget->setCurrentIndex(SearchScreenIndex);
+    stackedWidget.setCurrentIndex(SearchScreenIndex);
 
-    // You may need to trigger a refresh or update of your data display based on these filters
 }
 
 void MainWindow::handleGpio17Trigger()
 {
-    // Perform any cleanup or tasks before exiting
     QApplication::quit();
 }
 
 void MainWindow::handleGpio22Trigger()
 {
-    // Perform any cleanup or tasks before exiting
-    QApplication::quit();
     system("sudo shutdown -h now");
+    QApplication::quit();
+    
 }
 
 void MainWindow::performSearch()
@@ -244,11 +259,27 @@ void MainWindow::performSearch()
     emit searchCriteriaChanged(currentCriteria);
     showCollectionScreen();
 
-    // Call the search method with the collected criteria
-    // DatabaseManager db("test-collection");
-    // db.searchCards(currentCriteria.keywords.toStdString(),
-    //                 raritiesVec,
-    //                 typesVec,
-    //                 manaVec,
-    //                 colorsVec);
 }
+
+void MainWindow::feedCard(){
+    feeder->feedCard();
+}
+std::vector<std::string> MainWindow::convertQStringList(const QStringList &list)
+{
+    std::vector<std::string> result;
+    for (const auto &item : list)
+    {
+        result.push_back(item.toStdString());
+    }
+    return result;
+}
+
+void MainWindow::onProcessTimerTimeout() {
+    cardOCR->onProcessTimerTimeout();  // Start the timer with a 3-second interval
+}
+
+void MainWindow::startProcessTimer(int msec){
+    processTimer->start(msec);
+}
+
+

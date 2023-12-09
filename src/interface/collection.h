@@ -17,6 +17,18 @@ class Collection : public QWidget
 public:
     explicit Collection(QWidget *parent = nullptr);
     ~Collection();
+    struct SearchCriteria
+    {
+        QString keywords;     // User-inputted search keywords
+        QStringList rarities; // Selected rarities for filtering
+        QStringList types;    // Selected card types for filtering
+        QList<int> manaCosts; // Selected mana costs for filtering, changed from QStringList to QList<int>
+        QStringList colors;   // Selected colors for filtering
+    };
+    void setSearchCriteria(const Collection::SearchCriteria &criteria);
+    // std::vector<std::string> convertQStringList(const QStringList &list);
+
+
 
 signals:
     void backRequested();
@@ -29,7 +41,10 @@ private:
     // MainWindow *mainWindow;
 
     void loadImages();
-    std::vector<std::string> convertQStringList(const QStringList &list);
+
+
 };
+
+
 
 #endif // COLLECTION_H

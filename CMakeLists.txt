@@ -26,13 +26,18 @@ set(CMAKE_AUTORCC ON)
 #set(CMAKE_AUTOUIC ON)
 
 # Recursively find all .cpp and .ui files in the src directory
-file(GLOB_RECURSE SOURCES "src/*.cpp" "include/cv/*.cpp" "include/database/*.cpp" "include/feeder/*.cpp")
+# file(GLOB_RECURSE SOURCES "src/*.cpp" "include/cv/*.cpp" "include/database/*.cpp" "include/feeder/*.cpp")
+set(MOC "include/cv/CardOCR.hpp" "include/database/DatabaseManager.hpp" "include/feeder/Feeder.hpp" "src/main.cpp")
+# file(GLOB_RECURSE UI_FILES "src/*.ui")
+
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.hpp")
 file(GLOB_RECURSE UI_FILES "src/*.ui")
 
 qt5_wrap_ui(UI_HEADERS ${UI_FILES})
 
 # Define the executable and source files
-add_executable(${PROJECT_NAME} ${SOURCES} ${UI_HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${UI_HEADERS} ${MOC})
 
 # Link libraries to your project
 target_link_libraries(${PROJECT_NAME} PRIVATE 
@@ -54,6 +59,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/include/cv 
   ${CMAKE_CURRENT_SOURCE_DIR}/include/database
   ${CMAKE_CURRENT_SOURCE_DIR}/include/feeder
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/common
   ${OpenCV_INCLUDE_DIRS}
   ${Tesseract_INCLUDE_DIRS}
   ${Leptonica_INCLUDE_DIRS}

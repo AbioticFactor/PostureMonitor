@@ -8,6 +8,7 @@
 
 
 
+
 // use openCV to load image and find/ crop bottom left location
  
 // tesserect to read the card and return bottom left info text
@@ -90,22 +91,19 @@ std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im)
     std::sregex_iterator wordsBegin(ocrOutput.begin(), ocrOutput.end(), wordRegex);
     std::sregex_iterator wordsEnd;
 
-
-
-    emit findAndAddMostSimilarCard(ocrOutput, )
-    
-
-    // Get card info from database HERE
+    std::string imagePath = "/home/pi/mtg-collection-manager/src/cv/test.jpg";
 
     
-    emit frameProcessed(returnFrame);
+
+    
+    // emit frameProcessed(returnFrame);
     return std::tuple<std::string, cv::Mat> {std::string(outText.get()), returnFrame};
 }
 
 
 void CardOCR::run()
 {
-
+    stopRequested = false;
     cv::VideoCapture capFace(0);
 
     if (!capFace.isOpened()) {
@@ -135,10 +133,11 @@ void CardOCR::processCard() {
         if (frame.empty()) {
             std::cerr << "Error: Empty frame captured." << std::endl;
             emit finishedScanning();
+            stopRequested = true;
 
         } else {
             // Emit signal for processed frame
-            emit frameProcessed(frame);
+            // emit frameProcessed(frame);
             cv::Mat croppedImage = preprocessImage(frame);
             
             // Process the cropped image with Tesseract
@@ -150,54 +149,14 @@ void CardOCR::processCard() {
 
             std::vector<std::string> cardNames;
 
-            try {
-                SQLite::Database db("collection.db3", SQLite::OPEN_READONLY);
-                SQLite::Statement query(db, "SELECT name FROM Cards;"); // Replace 'Cards' and 'name' with your actual table and column names
 
-                while (query.executeStep()) {
-                    cardNames.push_back(query.getColumn(0).getString());
-                }
-            } catch (const std::exception& e) {
-                std::cerr << "SQLite exception: " << e.what() << std::endl;
-            }
-            int minDifference = std::numeric_limits<int>::max();
-            std::string mostSimilarCardName;
-            for (const auto& cardName : cardNames) {
-                int difference = 0;
-                size_t len = std::min(cardText.size(), cardName.size());
-
-                for (size_t i = 0; i < len; ++i) {
-                    difference += std::abs(cardText[i] - cardName[i]);
-                }
-
-                // Account for difference in length
-                difference += std::abs(static_cast<int>(cardText.size() - cardName.size()));
-                if (difference < minDifference) {
-                    minDifference = difference;
-                    mostSimilarCardName = cardName;
-                }
-            }
-
-            std::cout << "Most similar card name: " << mostSimilarCardName << std::endl;
-
-            try {
-                // Retrieve details of the most similar card from the reference collection
-                DatabaseManager::CardInfo cardDetails = db.getCardDetails(mostSimilarCardName);
-
-                // Save the image locally
-                std::string imagePath = "/home/pi/mtg-collection-manager/src/database/images" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".png";
-                cv::imwrite(imagePath, croppedImage);
-
-                // Add card to the user's collection with the new image path
-                db.addCard(cardDetails.name, cardDetails.mana_cost, cardDetails.color, cardDetails.card_type, cardDetails.rarity, imagePath, true);
-            } catch (const std::exception& e) {
-                std::cerr << "Error: " << e.what() << std::endl;
-            }
 
 
             // Save the image and add card to database
             std::string imagePath = "/home/pi/mtg-collection-manager/src/database/images" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".png";
             cv::imwrite(imagePath, croppedImage);
+
+            emit findAndAddMostSimilarCard(cardText, imagePath);
 
         }
     }
@@ -210,8 +169,7 @@ void CardOCR::onProcessTimerTimeout() {
     processCard(); // Process the card
 
     if (!stopRequested) {
-        feeder.feedCard(); // Feed the next card
-        processTimer.start(3000); // Restart the timer
+        emit feedCardRequested();
     } else {
         capFace.release(); // Release the camera
         emit finishedScanning(); // Notify that the process is finished
@@ -222,8 +180,7 @@ void CardOCR::onFeedTimerTimeout() {
     processCard(); // Process the card
 
     if (!stopRequested) {
-        feeder.feedCard(); // Feed the next card
-        feedTimer.start(3000); // Restart the timer
+        emit feedCardRequested();
     } else {
         capFace.release(); // Release the camera
         emit finishedScanning(); // Notify that the process is finished

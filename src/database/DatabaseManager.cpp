@@ -16,8 +16,8 @@ DatabaseManager::DatabaseManager(const char* db_name) : dbName(db_name), db(dbNa
 void DatabaseManager::createTable() {
     SQLite::Database db(dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE);
 
-    std::string createTableQuery = 
-    "CREATE TABLE IF NOT EXISTS cards ("
+    std::string createTableQuery_ref = 
+    "CREATE TABLE IF NOT EXISTS reference_cards ("
     "name TEXT NOT NULL, "
     "mana_cost TEXT, "
     "color TEXT, "
@@ -26,7 +26,19 @@ void DatabaseManager::createTable() {
     "image_path TEXT"
     ");";
 
-    db.exec(createTableQuery);
+    std::string createTableQuery_user = 
+    "CREATE TABLE IF NOT EXISTS user_cards ("
+    "name TEXT NOT NULL, "
+    "mana_cost TEXT, "
+    "color TEXT, "
+    "card_type TEXT, "
+    "rarity TEXT, "
+    "image_path TEXT"
+    ");";
+
+    db.exec(createTableQuery_ref);
+    db.exec(createTableQuery_user);
+
 }
 
 #include <fstream>
@@ -189,13 +201,13 @@ void DatabaseManager::findAndAddMostSimilarCard(const std::string& inputCardName
     if (!mostSimilarCardName.empty()) {
         // Retrieve full details of the most similar card
         // Assuming getCardDetails function exists
-        auto cardDetails = getCardDetails(mostSimilarCardName);
+        CardInfo cardDetails = getCardDetails(mostSimilarCardName);
         addCard(cardDetails.name, cardDetails.mana_cost, cardDetails.color, 
                 cardDetails.card_type, cardDetails.rarity, cardDetails.imagePath, true);
     }
 }
 
-void DatabaseManager::getCardDetails(const std::string& cardName) {
+DatabaseManager::CardInfo DatabaseManager::getCardDetails(const std::string& cardName) {
     SQLite::Database db(dbName, SQLite::OPEN_READONLY);
     SQLite::Statement query(db, "SELECT name, mana_cost, color, card_type, rarity, image_path FROM reference_cards WHERE name = ?");
     query.bind(1, cardName);
@@ -209,6 +221,8 @@ void DatabaseManager::getCardDetails(const std::string& cardName) {
         cardDetails.rarity = query.getColumn(4).getString();
         cardDetails.imagePath = query.getColumn(5).getString();
     }
+
+    return cardDetails;
 }
 
 // Function to calculate the Levenshtein distance
@@ -227,24 +241,27 @@ int DatabaseManager::levenshteinDistance(const std::string &s1, const std::strin
     return d[len1][len2];
 }
 
-/*
-Example code: 
-int main() {
-try {
-    DatabaseManager dbManager("mtg_collection.db");
-
-    // Example usage
-    dbManager.addCard(1, "Black Lotus", 0, "Artifact", "Alpha", "Rare", 0, 0, "Christopher Rush");
+std::vector<DatabaseManager::CardInfo> DatabaseManager::getAllCards(bool isUserCollection) {
+    std::vector<CardInfo> cards;
     
-    // Example filter usage
-    dbManager.filterCards("Lotus", "Rare", -1, "", "");
+    // Choose the table based on whether it's a user collection or reference cards
+    std::string table = isUserCollection ? "user_cards" : "reference_cards";
+    
+    // SQL query to select all cards
+    std::string query = "SELECT name, mana_cost, color, card_type, rarity, image_path FROM " + table;
 
-    // Note: Closing the database is handled by SQLite::Database destructor
-} catch (const std::exception& e) {
-    std::cerr << "SQLite exception: " << e.what() << std::endl;
-    return 1;
+    SQLite::Statement queryExec(db, query);
+    while (queryExec.executeStep()) {
+        CardInfo card;
+        card.name = queryExec.getColumn(0).getString();
+        card.mana_cost = queryExec.getColumn(1).getInt();
+        card.color = queryExec.getColumn(2).getString();
+        card.card_type = queryExec.getColumn(3).getString();
+        card.rarity = queryExec.getColumn(4).getString();
+        card.imagePath = queryExec.getColumn(5).getString();
+        cards.push_back(card);
+    }
+
+    return cards;
 }
 
-return 0;
-}
-*/

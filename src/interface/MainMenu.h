@@ -19,12 +19,12 @@ public:
 signals:
   void scanClicked();
   void searchCollectionClicked();
-  void searchCollectionClicked();
+  void EmailClicked();
 
-private slots:
+public slots:
+  void on_EmailButton_clicked();
   void on_scanButton_clicked();
   void on_searchCollectionButton_clicked();
-  void updatePricesClicked();
 
 private:
   Ui::MainMenu *ui;

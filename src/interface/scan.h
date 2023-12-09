@@ -4,23 +4,29 @@
 #include <QMainWindow>
 #include <QLabel>
 #include <QPushButton>
+#include <opencv2/opencv.hpp>
+
 
 namespace Ui {
     class Scan;
 }
 
-class Scan : public QMainWindow {
+class Scan : public QWidget {
     Q_OBJECT
 
 public:
-    explicit Scan(QMainWindow *parent = nullptr);
+    explicit Scan(QWidget *parent = nullptr);
     ~Scan();
 
 signals:
     void stopClicked();
+    void switchToCollectionView();
 
-private slots:
+
+public slots:
     void on_stopButton_clicked();
+    void onFinishedScanning();
+    void displayFrame(const cv::Mat &frame);
 
 private:
     Ui::Scan *ui;

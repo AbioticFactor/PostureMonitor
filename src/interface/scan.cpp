@@ -1,7 +1,7 @@
 #include "scan.h"
 #include "ui_scan.h"
 #include <QTimer>
-// Include OpenCV headers if needed
+
 // #include <opencv2/opencv.hpp>
 
 Scan::Scan(QWidget *parent)
@@ -10,15 +10,11 @@ Scan::Scan(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Assuming 'label' is the placeholder for the video feed and 'pushButton' is the stop button
-    // connect(ui->stopButton, &QPushButton::clicked, this, &Scan::on_stopButton_clicked);
 
-    // Initialize OpenCV capture and display loop here...
 }
 
 Scan::~Scan()
 {
-    // Properly release OpenCV resources if needed
     delete ui;
 }
 
@@ -30,7 +26,6 @@ void Scan::on_stopButton_clicked()
     QTimer::singleShot(500, [this]()
                        { ui->stopButton->setEnabled(true); });
     QStringList selectedRarities;
-    // Stop the OpenCV video capture and any related operations here...
     emit stopClicked(); // Emit signal to indicate stopping the scanning process
 }
 
@@ -49,5 +44,5 @@ void Scan::displayFrame(const cv::Mat &frame)
 void Scan::onFinishedScanning()
 {
     // Handle the completion of the scanning process
-    emit switchToCollectionView();
+    // emit switchToCollectionView();
 }

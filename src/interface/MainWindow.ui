@@ -13,16 +13,19 @@
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="spacing">
-    <number>6</number>
-   </property>
-   <property name="sizeConstraint">
-    <enum>QLayout::SetDefaultConstraint</enum>
-   <item>
-    <widget class="QStackedWidget" name="stackedWidget"/>
-   </item>
-  </layout>
+
+  <!-- Central widget -->
+  <widget class="QWidget" name="centralWidget">
+    <!-- Layout for the central widget -->
+    <layout class="QVBoxLayout" name="verticalLayout">
+      <property name="spacing">
+        <number>6</number>
+      </property>
+      <!-- Add widgets inside this layout as needed -->
+      <!-- Example: <item> <widget class="QLabel" name="label"/> </item> -->
+    </layout>
+  </widget>
+
  </widget>
  <resources/>
  <connections/>

@@ -22,6 +22,18 @@ public:
     void processCard();
 
     // Additional methods and signals/slots here...
+public slots:
+    void handleStopScanning();
+    void onProcessTimerTimeout();
+    void onFeedTimerTimeout();
+    
+
+signals:
+    void findAndAddMostSimilarCard(const std::string& inputCardName, const std::string& imagePath);
+    void frameProcessed(cv::Mat frame);
+    void feedCardRequested();
+    void finishedScanning();
+    void requestProcessingDelay(int delay);
 
 private:
     std::unique_ptr<tesseract::TessBaseAPI, std::function<void(tesseract::TessBaseAPI*)>> api;
@@ -32,7 +44,6 @@ private:
     bool initializeOCR();
     bool initializeCamera();
     cv::Mat preprocessImage(const cv::Mat &image);
-    int levenshteinDistance(const std::string &s1, const std::string &s2);
     
     void destroyApi(tesseract::TessBaseAPI* api);
     void destroyPix(Pix* p);

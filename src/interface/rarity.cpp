@@ -2,7 +2,7 @@
 #include "ui_rarity.h"
 #include <QTimer>
 
-Rarities::Rarities(QMainWindow *parent) : QMainWindow(parent),
+Rarities::Rarities(QWidget *parent) : QWidget(parent),
                                           ui(new Ui::Rarities)
 {
     ui->setupUi(this);
