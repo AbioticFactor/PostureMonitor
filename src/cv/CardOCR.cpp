@@ -59,7 +59,7 @@ bool CardOCR::initializeOCR() {
 }
 
 bool CardOCR::initializeCamera() {
-
+    return true;
 }
 
 std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im)

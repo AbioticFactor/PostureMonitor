@@ -40,6 +40,7 @@ signals:
     void searchCriteriaChanged(Collection::SearchCriteria criteria);
     void gpio22Triggered();
     void gpio17Triggered();
+    void showCards(std::vector<DatabaseManager::CardInfo> cards);
     
 public slots:
     void showMainMenuScreen();
@@ -50,7 +51,7 @@ public slots:
     void applyTypeFilter(const QStringList &types);
     void applyCostColorFilter(const QList<int> &manaCosts, const QList<QString> &colors);
     void performSearch();
-    void showCollectionScreen();
+    void showCollectionScreen(std::vector<DatabaseManager::CardInfo> cards);
     void handleGpio17Trigger();
     void handleGpio22Trigger();
     void on_searchCollectionButton_clicked();

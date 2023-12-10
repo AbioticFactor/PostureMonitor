@@ -2,7 +2,7 @@
 #define COLLECTION_H
 
 #include <QWidget>
-
+#include <database/DatabaseManager.hpp>
 // #include "MainWindow.h"
 
 namespace Ui
@@ -25,10 +25,10 @@ public:
         QList<int> manaCosts; // Selected mana costs for filtering, changed from QStringList to QList<int>
         QStringList colors;   // Selected colors for filtering
     };
-    void setSearchCriteria(const Collection::SearchCriteria &criteria);
+public slots:
+    void setSearchCriteria(const SearchCriteria &criteria);
+    void showCardImages(std::vector<DatabaseManager::CardInfo> cards);
     // std::vector<std::string> convertQStringList(const QStringList &list);
-
-
 
 signals:
     void backRequested();

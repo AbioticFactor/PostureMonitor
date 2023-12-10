@@ -70,6 +70,7 @@ MainWindow::MainWindow(QMainWindow *parent)
     connect(this, &MainWindow::searchCriteriaChanged, collectionScreen, &Collection::setSearchCriteria);
     connect(this, &MainWindow::gpio17Triggered, this, &MainWindow::handleGpio17Trigger);
     connect(this, &MainWindow::gpio22Triggered, this, &MainWindow::handleGpio22Trigger);
+    connect(this, &MainWindow::showCards, collectionScreen, &Collection::showCardImages);
 
     // MainMenu buttons
     connect(mainMenuScreen, &MainMenu::scanClicked, this, &MainWindow::on_scanButton_clicked);
@@ -88,10 +89,9 @@ MainWindow::MainWindow(QMainWindow *parent)
 
     // Scan screen
     connect(scanScreen, &Scan::stopClicked, cardOCR, &CardOCR::handleStopScanning);
-    connect(scanScreen, &Scan::stopClicked, this, &MainWindow::showCollectionScreen);
+    connect(scanScreen, &Scan::stopClicked, this, &MainWindow::performSearch);
 
     
-    connect(scanScreen, &Scan::switchToCollectionView, this, &MainWindow::showCollectionScreen);
 
     // Rarities screen
     connect(raritiesScreen, &Rarities::raritiesSelected, this, &MainWindow::applyRaritiesFilter);
@@ -111,21 +111,10 @@ MainWindow::MainWindow(QMainWindow *parent)
     connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::feedCard);
     connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::startProcessTimer);
 
-    
-    
-    // I HIGHLY DOUBT THIS WORKS
+    connect(processTimer, &QTimer::timeout, this, &MainWindow::onProcessTimerTimeout);
 
     std::cout << "connected it all" << std::endl;
 
-    // processTimer->setSingleShot(true);
-
-    connect(processTimer, &QTimer::timeout, this, &MainWindow::onProcessTimerTimeout);
-
-    
-
-
-
-    
 }
 
 MainWindow::~MainWindow()
@@ -206,9 +195,11 @@ void MainWindow::showEditFiltersScreen()
     stackedWidget.setCurrentIndex(FilterScreenIndex);
 }
 
-void MainWindow::showCollectionScreen()
+void MainWindow::showCollectionScreen(std::vector<DatabaseManager::CardInfo> cards)
 {
+    
     stackedWidget.setCurrentIndex(CollectionScreenIndex);
+    emit showCards(cards);
 }
 
 void MainWindow::applyCostColorFilter(const QList<int> &manaCosts, const QList<QString> &colors)
@@ -227,43 +218,36 @@ void MainWindow::handleGpio17Trigger()
 
 void MainWindow::handleGpio22Trigger()
 {
-    system("sudo shutdown -h now");
-    QApplication::quit();
     
+    QApplication::quit();
+    system("sudo shutdown -h now");
 }
 
 void MainWindow::performSearch()
 {
     // Conversion from QStringList to std::vector<std::string>
-    std::vector<std::string> raritiesVec;
-    for (const auto &rarity : currentCriteria.rarities)
-    {
-        raritiesVec.push_back(rarity.toStdString());
-    }
-    std::vector<std::string> typesVec;
-    for (const auto &type : currentCriteria.types)
-    {
-        typesVec.push_back(type.toStdString());
-    }
-    std::vector<std::string> colorsVec;
-    for (const auto &color : currentCriteria.colors)
-    {
-        colorsVec.push_back(color.toStdString());
-    }
+    std::vector<std::string> raritiesVec = convertQStringList(currentCriteria.rarities);
+    std::vector<std::string> typesVec = convertQStringList(currentCriteria.types);
+    std::vector<std::string> colorsVec = convertQStringList(currentCriteria.colors);
     std::vector<int> manaVec;
-    for (const auto &manaCost : currentCriteria.manaCosts)
+    for (const int manaCost : currentCriteria.manaCosts)
     {
         manaVec.push_back(manaCost);
     }
-
+    std::vector<int> imagePathVec;
     emit searchCriteriaChanged(currentCriteria);
-    showCollectionScreen();
+
+    std::vector<DatabaseManager::CardInfo> cards = dbManager->searchCards(raritiesVec, typesVec, manaVec, colorsVec, true);
+    // get the cards with the current criteria
+    
+    showCollectionScreen(cards);
 
 }
 
 void MainWindow::feedCard(){
     feeder->feedCard();
 }
+
 std::vector<std::string> MainWindow::convertQStringList(const QStringList &list)
 {
     std::vector<std::string> result;

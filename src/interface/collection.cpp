@@ -3,6 +3,8 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QScrollArea>
+#include <iostream>
+
 
 Collection::Collection(QWidget *parent)
     : QWidget(parent),
@@ -68,6 +70,11 @@ void Collection::setSearchCriteria(const Collection::SearchCriteria &criteria)
 {
     // currentCriteria = criteria;
     // loadImages(); // Assuming loadImages uses currentCriteria to load images
+}
+
+void Collection::showCardImages(std::vector<DatabaseManager::CardInfo> cards) {
+    //IMPLEMENT LOGIC TO SHOW CARDS HERE
+    std::cout << "got to showing images" << std::endl;
 }
 
 // std::vector<std::string> Collection::convertQStringList(const QStringList &list)
