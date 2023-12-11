@@ -20,12 +20,10 @@ public:
 
 signals:
     void stopClicked();
-    void switchToCollectionView();
 
 
 public slots:
     void on_stopButton_clicked();
-    void onFinishedScanning();
     void displayFrame(const cv::Mat &frame);
 
 private:

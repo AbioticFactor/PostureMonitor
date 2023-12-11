@@ -28,7 +28,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QMainWindow *parent = nullptr);
 
-    Collection::SearchCriteria currentCriteria;
+    
 
     ~MainWindow();
     std::vector<std::string> convertQStringList(const QStringList &list);
@@ -75,6 +75,7 @@ private:
     DatabaseManager *dbManager;
     QTimer *processTimer;
     QTimer *feedTimer;
+    Collection::SearchCriteria currentCriteria;
 
 
     enum ScreenIndices

@@ -48,19 +48,20 @@ private slots:
 
 int main(int argc, char *argv[])
 {
-    bool addto = false;
+    bool addToReference = false;
+    bool addToUser = true;
 
     DatabaseManager dbManager("collection.db3");
-    dbManager.addCard("Fallaji Archaeologist", 2, "blue", "Creature", "Common", "", addto);
-    dbManager.addCard("Swiftgear Drake", 5, "colorless", "Artifact", "Common", "", addto);
-    dbManager.addCard("Gnawing Vermin", 1, "black", "Creature", "Uncommon", "", addto);
-    dbManager.addCard("Giant Cindermaw", 3, "red", "Creature", "Uncommon", "", addto);
-    dbManager.addCard("Gaea's Courser", 5, "green", "Creature", "Uncommon", "", addto);
-    dbManager.addCard("Sardian Cliffstomper", 2, "red", "Creature", "Uncommon", "", addto);
-    dbManager.addCard("Phallanx Vanguard", 2, "white", "Creature", "Common", "", addto);
-    dbManager.addCard("Blitz Automoton", 7, "colorless", "Artifact", "Common", "", addto);
-    dbManager.addCard("Meticulous Excavation", 1, "white", "Enchantment", "Uncommon", "", addto);
-    dbManager.addCard("Lat-Nam Adept", 4, "blue", "Creature", "Common", "", addto);
+    dbManager.addCard("Fallaji Archaeologist", 2, "blue", "Creature", "Common", "/home/pi/mtg-collection-manager/src/images/black_dark.png", addToReference);
+    dbManager.addCard("Swiftgear Drake", 5, "colorless", "Artifact", "Common", "/home/pi/mtg-collection-manager/src/images/black_light.png", addToReference);
+    dbManager.addCard("Gnawing Vermin", 1, "black", "Creature", "Uncommon", "/home/pi/mtg-collection-manager/src/images/blue_dark.png", addToReference);
+    dbManager.addCard("Giant Cindermaw", 3, "red", "Creature", "Uncommon", "/home/pi/mtg-collection-manager/src/images/blue_light.png", addToReference);
+    dbManager.addCard("Gaea's Courser", 5, "green", "Creature", "Uncommon", "/home/pi/mtg-collection-manager/src/images/green_dark.png", addToReference);
+    dbManager.addCard("Sardian Cliffstomper", 2, "red", "Creature", "Uncommon", "/home/pi/mtg-collection-manager/src/images/green_light.png", addToUser);
+    dbManager.addCard("Phallanx Vanguard", 2, "white", "Creature", "Common", "/home/pi/mtg-collection-manager/src/images/red_dark.png", addToUser);
+    dbManager.addCard("Blitz Automoton", 7, "colorless", "Artifact", "Common", "/home/pi/mtg-collection-manager/src/images/red_light.png", addToUser);
+    dbManager.addCard("Meticulous Excavation", 1, "white", "Enchantment", "Uncommon", "/home/pi/mtg-collection-manager/src/images/white_dark.png", addToUser);
+    dbManager.addCard("Lat-Nam Adept", 4, "blue", "Creature", "Common", "/home/pi/mtg-collection-manager/src/images/white_light.png", addToUser);
 
 
 

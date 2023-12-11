@@ -47,12 +47,15 @@ bool CardOCR::initializeOCR() {
     // char* configs[] = {config1};
     // int configs_size = 1;
 
-    if (api->Init(NULL, "eng", tesseract::OEM_LSTM_ONLY)) {
+    if (api->Init(NULL, "mtg", tesseract::OEM_DEFAULT)) {
         fprintf(stderr, "Could not initialize tesseract.\n");
         return false;
     }
     // api->SetPageSegMode(tesseract::PSM_AUTO);
     api->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
+
+    api->SetVariable("user_defined_dpi", "300");
+
 
     std::cout << "OCR engaged" << std::endl;;
     return true;
@@ -64,22 +67,10 @@ bool CardOCR::initializeCamera() {
 
 std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im)
 {
-    // Read in card and preprocess img
-    cv::Mat returnFrame = im;
-    cv::Mat grayImg = preprocessImage(im);
 
-
-    // Extract the top third of the image
-    int heightTopThird = im.rows / 2;
-    cv::Rect roi(0, 0, im.cols, heightTopThird); // ROI covering the top third
-    cv::imwrite("/home/pi/mtg-collection-manager/src/cv/uncropped.jpg", im);
-
-    cv::Mat croppedImg = im(roi); // Crop the image to the top third
-    cv::imwrite("/home/pi/mtg-collection-manager/src/cv/cropped.jpg", croppedImg);
 
     // Process the cropped image with Tesseract
-    api->SetVariable("user_defined_dpi", "300");
-    api->SetImage(croppedImg.data, croppedImg.cols, croppedImg.rows, 3, croppedImg.step);
+    api->SetImage(im.data, im.cols, im.rows, 3, im.step);
     outText.reset(api->GetUTF8Text());
 
     // Process OCR output with regex
@@ -97,14 +88,14 @@ std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im)
 
     
     // emit frameProcessed(returnFrame);
-    return std::tuple<std::string, cv::Mat> {std::string(outText.get()), returnFrame};
+    return std::tuple<std::string, cv::Mat> {std::string(outText.get()), im};
 }
 
 
 void CardOCR::run()
 {
     stopRequested = false;
-    cv::VideoCapture capFace(0);
+    capFace.open(0);
 
     if (!capFace.isOpened()) {
         std::cerr << "Camera failed" << std::endl;
@@ -138,7 +129,9 @@ void CardOCR::processCard() {
         } else {
             // Emit signal for processed frame
             // emit frameProcessed(frame);
-            cv::Mat croppedImage = preprocessImage(frame);
+            cv::imwrite("/home/pi/mtg-collection-manager/src/cv/BEFORECROPPING.jpg", frame);
+            cv::Mat croppedImage = preprocessImage(frame, 0.28, 0.45, 3.0/4.0, 1.1/6.0);
+
             
             // Process the cropped image with Tesseract
             auto output = getCardName(croppedImage);
@@ -154,7 +147,7 @@ void CardOCR::processCard() {
 
             // Save the image and add card to database
             std::string imagePath = "/home/pi/mtg-collection-manager/src/database/images" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".png";
-            cv::imwrite(imagePath, croppedImage);
+            // cv::imwrite(imagePath, croppedImage);
 
             emit findAndAddMostSimilarCard(cardText, imagePath);
 
@@ -193,30 +186,47 @@ void CardOCR::handleStopScanning() {
 
 
 // Function to preprocess the image and return a binarized version
-cv::Mat CardOCR::preprocessImage(const cv::Mat &image) {
-    cv::Mat gray, thresh;
-    cvtColor(image, gray, cv::COLOR_BGR2GRAY);
-    threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
+cv::Mat CardOCR::preprocessImage(const cv::Mat &image, double leftMarginPercent, 
+                                 double rightMarginPercent, double topMarginPercent,
+                                 double bottomMarginPercent) {
+    cv::Mat gray;
+    if (image.channels() > 1) {
+        cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+    } else {
+        gray = image.clone();
+    }
 
-    // Calculate the dimensions of the bottom third
-    int sideMargin = thresh.cols * 0.3; // 10% of the width of the image for each side
+    // Apply thresholding
+    cv::Mat thresh;
+    cv::threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
 
-    // Calculate the dimensions of the cropped area
-    int x = sideMargin; // New X coordinate, 10% in from the left edge
-    int y = thresh.rows * 2 / 3; // Y coordinate, two-thirds down from the top
-    int width = thresh.cols - 2 * sideMargin; // Width of the ROI, minus the side margins
-    int height = thresh.rows / 3; // Height of the ROI, one-third of the image height
+    // Calculate the margins as pixel values
+    int leftMargin = static_cast<int>(thresh.cols * leftMarginPercent);
+    int rightMargin = static_cast<int>(thresh.cols * rightMarginPercent);
+    int topMargin = static_cast<int>(thresh.rows * topMarginPercent);
+    int bottomMargin = static_cast<int>(thresh.rows * bottomMarginPercent);
+
+    // Ensure margins do not overlap and exceed image boundaries
+    leftMargin = std::max(0, std::min(leftMargin, thresh.cols - 1));
+    rightMargin = std::max(0, std::min(rightMargin, thresh.cols - 1 - leftMargin));
+    topMargin = std::max(0, std::min(topMargin, thresh.rows - 1));
+    bottomMargin = std::max(0, std::min(bottomMargin, thresh.rows - 1 - topMargin));
+
+    // Calculate the width and height of the ROI
+    int width = thresh.cols - leftMargin - rightMargin;
+    int height = thresh.rows - topMargin - bottomMargin;
 
     // Create the rectangle for the region of interest
-    cv::Rect roi(x, y, width, height);
+    cv::Rect roi(leftMargin, topMargin, width, height);
 
-    // Crop the image
-    cv::Mat croppedImage = thresh(roi);
+    // Crop the image to the ROI
+    cv::Mat croppedImg = thresh(roi);
 
-    cv::Mat flippedImage;
-    cv::flip(croppedImage, flippedImage, 1);
 
-    return flippedImage;
+    cv::imwrite("/home/pi/mtg-collection-manager/src/cv/cropped.jpg", croppedImg);
+
+
+    return croppedImg;
 }
 
 

@@ -122,23 +122,23 @@ std::vector<DatabaseManager::CardInfo> DatabaseManager::searchCards(const std::v
     std::vector<DatabaseManager::CardInfo> cards;
 
     std::string query = isUserCollection
-        ? "SELECT mana_cost, color, card_type, rarity, image_path FROM user_cards WHERE 1 = 1"
-        : "SELECT mana_cost, color, card_type, rarity, image_path FROM reference_cards WHERE 1 = 1";
+        ? "SELECT name, mana_cost, color, card_type, rarity, image_path FROM user_cards WHERE 1 = 1"
+        : "SELECT name, mana_cost, color, card_type, rarity, image_path FROM reference_cards WHERE 1 = 1";
 
 
     // Add rarity filter
     if (!rarities.empty()) {
-        query += " AND rarity IN ('" + join(rarities, "', '") + "')";
+        query += " OR rarity IN ('" + join(rarities, "', '") + "')";
     }
 
     // Add type filter
     if (!types.empty()) {
-        query += " AND card_type IN ('" + join(types, "', '") + "')";
+        query += " OR card_type IN ('" + join(types, "', '") + "')";
     }
 
     // Add mana cost filter
     if (!manaCosts.empty()) {
-        query += " AND mana_cost IN (";
+        query += " OR mana_cost IN (";
         for (size_t i = 0; i < manaCosts.size(); ++i) {
             query += std::to_string(manaCosts[i]);
             if (i < manaCosts.size() - 1) {
@@ -150,7 +150,7 @@ std::vector<DatabaseManager::CardInfo> DatabaseManager::searchCards(const std::v
 
     // Add color filter
     if (!colors.empty()) {
-        query += " AND color IN ('" + join(colors, "', '") + "')";
+        query += " OR color IN ('" + join(colors, "', '") + "')";
     }
 
     SQLite::Statement queryExec(db, query);

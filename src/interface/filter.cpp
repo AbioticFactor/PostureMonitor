@@ -2,6 +2,7 @@
 #include "ui_filter.h"
 // #include "MainWindow.h"
 #include <QTimer>
+#include <QPushButton>
 
 Filter::Filter(QWidget *parent) : QWidget(parent),
                                   ui(new Ui::Filter)
@@ -55,11 +56,11 @@ void Filter::on_typesButton_clicked()
 void Filter::gatherManaCosts(QList<int> &manaCosts)
 {
     // Iterate over manaCostCheckBoxes and gather selected costs
-    for (QCheckBox *checkBox : {ui->checkBox, ui->checkBox_2, ui->checkBox_3, ui->checkBox_4, ui->checkBox_5, ui->checkBox_6, ui->checkBox_7})
+    for (QPushButton *pushButton : {ui->b0, ui->b1, ui->b2, ui->b3, ui->b4, ui->b5, ui->b6})
     {
-        if (checkBox->isChecked())
+        if (pushButton->isChecked())
         {
-            manaCosts.append(checkBox->text().toInt());
+            manaCosts.append(pushButton->objectName().mid(1).toInt());
         }
     }
 }
@@ -67,13 +68,37 @@ void Filter::gatherManaCosts(QList<int> &manaCosts)
 void Filter::gatherColors(QList<QString> &colors)
 {
     // Iterate over colorCheckBoxes and gather selected colors
-    for (QCheckBox *checkBox : {ui->checkBox_8, ui->checkBox_9, ui->checkBox_10, ui->checkBox_11, ui->checkBox_12, ui->checkBox_13, ui->checkBox_14})
+    for (QPushButton *pushbutton : {ui->bWhite, ui->bBlue, ui->bGreen, ui->bBlack, ui->bRed, ui->bMulticolored, ui->bColorless})
     {
-        if (checkBox->isChecked())
+        if (pushbutton->isChecked())
         {
-            colors.append(checkBox->text());
+            colors.append(pushbutton->objectName().mid(1));
         }
     }
 }
+
+// void Filter::gatherManaCosts(QList<int> &manaCosts)
+// {
+//     // Iterate over manaCostCheckBoxes and gather selected costs
+//     for (QCheckBox *checkBox : {ui->checkBox, ui->checkBox_2, ui->checkBox_3, ui->checkBox_4, ui->checkBox_5, ui->checkBox_6, ui->checkBox_7})
+//     {
+//         if (checkBox->isChecked())
+//         {
+//             manaCosts.append(checkBox->text().toInt());
+//         }
+//     }
+// }
+
+// void Filter::gatherColors(QList<QString> &colors)
+// {
+//     // Iterate over colorCheckBoxes and gather selected colors
+//     for (QCheckBox *checkBox : {ui->checkBox_8, ui->checkBox_9, ui->checkBox_10, ui->checkBox_11, ui->checkBox_12, ui->checkBox_13, ui->checkBox_14})
+//     {
+//         if (checkBox->isChecked())
+//         {
+//             colors.append(checkBox->text());
+//         }
+//     }
+// }
 
 // In the future need multi color card support better (by text, flipped cards, etc)

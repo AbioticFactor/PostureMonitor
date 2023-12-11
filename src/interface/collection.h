@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <database/DatabaseManager.hpp>
 // #include "MainWindow.h"
+#include <zoom.h>
 
 namespace Ui
 {
@@ -27,17 +28,21 @@ public:
     };
 public slots:
     void setSearchCriteria(const SearchCriteria &criteria);
+    void backFromZoom();
     void showCardImages(std::vector<DatabaseManager::CardInfo> cards);
     // std::vector<std::string> convertQStringList(const QStringList &list);
 
 signals:
     void backRequested();
+    void showEnlargedCardImage(QString imagePath);
 
 private slots:
     void on_doneButton_clicked();
+    void on_Card_clicked();
 
 private:
     Ui::Collection *ui;
+    Zoom *zoom;
     // MainWindow *mainWindow;
 
     void loadImages();

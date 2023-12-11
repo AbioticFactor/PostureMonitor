@@ -43,8 +43,9 @@ private:
 
     bool initializeOCR();
     bool initializeCamera();
-    cv::Mat preprocessImage(const cv::Mat &image);
-    
+    cv::Mat preprocessImage(const cv::Mat &image, double leftMarginPercent, 
+                                    double rightMarginPercent, double topMarginPercent,
+                                    double bottomMarginPercent);
     void destroyApi(tesseract::TessBaseAPI* api);
     void destroyPix(Pix* p);
     void destroyChar(char* c);

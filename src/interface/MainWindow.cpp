@@ -33,8 +33,11 @@ MainWindow::MainWindow(QMainWindow *parent)
       feedTimer(new QTimer())
 
 {
-
-
+    currentCriteria.keywords = "";
+    currentCriteria.rarities = QStringList{"Common"}; // Example values
+    //currentCriteria.types = QStringList{"Creature", "Planeswalker", "Instant", "Sorcery", "Land", "Enchantment", "Artifact", "Battle", "Commanders"}; // Example values
+    //currentCriteria.manaCosts = QList<int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}; // Example values
+    //currentCriteria.colors = QStringList{"White", "Blue", "Black", "Red", "Green", "Colorless", "Multi-colored"}; // Exam
 
     std::cout << "about to ui arrow setup" << std::endl;
 

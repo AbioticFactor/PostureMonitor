@@ -40,9 +40,3 @@ void Scan::displayFrame(const cv::Mat &frame)
     ui->imageLabel->setPixmap(pixmap.scaled(ui->imageLabel->size(), Qt::KeepAspectRatio, Qt::FastTransformation));
     ui->imageLabel->setScaledContents(true);
 }
-
-void Scan::onFinishedScanning()
-{
-    // Handle the completion of the scanning process
-    // emit switchToCollectionView();
-}
