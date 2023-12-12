@@ -5,6 +5,30 @@
 #include <chrono>
 #include <cv/CardOCR.hpp>
 #include <regex>
+#include <aws/core/Aws.h>
+// #include <aws/core/utils/ByteBuffer.h>
+#include <aws/core/utils/memory/stl/AWSStringStream.h>
+#include <aws/rekognition/RekognitionClient.h>
+#include <aws/rekognition/model/DetectTextRequest.h>
+#include <aws/rekognition/model/DetectTextResult.h>
+
+#include <aws/core/Aws.h>
+#include <aws/core/utils/Outcome.h>
+#include <aws/core/config/AWSProfileConfigLoader.h>
+#include <aws/rekognition/RekognitionClient.h>
+#include <aws/rekognition/model/ListCollectionsRequest.h>
+#include <aws/rekognition/model/ListCollectionsResult.h>
+#include <aws/rekognition/model/CreateCollectionRequest.h>
+#include <aws/rekognition/model/IndexFacesRequest.h>
+#include <aws/rekognition/model/Image.h>
+#include <aws/rekognition/model/SearchFacesByImageRequest.h>
+#include <aws/rekognition/model/ListFacesRequest.h>
+#include <aws/rekognition/model/ListFacesResult.h>
+#include <aws/core/platform/Environment.h>
+
+#include <iostream>
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 
 
@@ -47,7 +71,7 @@ bool CardOCR::initializeOCR() {
     // char* configs[] = {config1};
     // int configs_size = 1;
 
-    if (api->Init(NULL, "mtg", tesseract::OEM_DEFAULT)) {
+    if (api->Init(NULL, "eng", tesseract::OEM_DEFAULT)) {
         fprintf(stderr, "Could not initialize tesseract.\n");
         return false;
     }
@@ -65,32 +89,114 @@ bool CardOCR::initializeCamera() {
     return true;
 }
 
-std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im)
-{
-
-
-    // Process the cropped image with Tesseract
-    api->SetImage(im.data, im.cols, im.rows, 3, im.step);
-    outText.reset(api->GetUTF8Text());
-
-    // Process OCR output with regex
-    std::string ocrOutput = outText.get();
-    std::string filteredOutput;
-    std::regex wordRegex(R"(\b[a-zA-Z]{5,}\b)"); // Matches words with 5 or more letters
-
-
-    std::sregex_iterator wordsBegin(ocrOutput.begin(), ocrOutput.end(), wordRegex);
-    std::sregex_iterator wordsEnd;
-
-    std::string imagePath = "/home/pi/mtg-collection-manager/src/cv/test.jpg";
-
-    
-
-    
-    // emit frameProcessed(returnFrame);
-    return std::tuple<std::string, cv::Mat> {std::string(outText.get()), im};
+std::string CardOCR::execOCR(const char* cmd) {
+    std::array<char, 128> buffer;
+    std::string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+    return result;
 }
 
+std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im) {
+    // Initialize the AWS SDK
+    Aws::Auth::AWSCredentials awsCredentials("KEY", "SECRET KEY");
+
+    Aws::SDKOptions options;
+    Aws::InitAPI(options);
+
+    std::string textResult;
+
+    try {
+        // Convert OpenCV Mat to a byte array
+        std::vector<uchar> buf;
+        cv::imencode(".png", im, buf);
+        auto byteBuffer = Aws::Utils::ByteBuffer(buf.data(), buf.size());
+        try {
+            Aws::Rekognition::RekognitionClient rekognitionClient(awsCredentials);
+
+            // Create a request to Rekognition
+            Aws::Rekognition::Model::DetectTextRequest request;
+            request.WithImage(Aws::Rekognition::Model::Image().WithBytes(byteBuffer));
+
+            // Call DetectText API
+            auto outcome = rekognitionClient.DetectText(request);
+
+            if (outcome.IsSuccess()) {
+                // Process the result
+                const auto& textDetections = outcome.GetResult().GetTextDetections();
+                if (!textDetections.empty()) {
+                    textResult = textDetections.front().GetDetectedText();
+                    std::cout << textResult << std::endl;
+                } else {
+                    textResult = "No text detected";
+                    onProcessTimerTimeout();
+                }
+            } else {
+                // Handle error
+                textResult = "Error in DetectText: ";
+                textResult += outcome.GetError().GetMessage();
+            }
+
+        } catch (const std::exception& e) {
+            textResult = "Exception: ";
+            textResult += e.what();
+        }
+        // Create a Rekognition client
+
+    } catch (const std::exception& e) {
+        textResult = "Exception: ";
+        textResult += e.what();
+    }
+
+    // Shutdown the AWS SDK
+    Aws::ShutdownAPI(options);
+
+    // Return the extracted text and the image
+    return std::make_tuple(textResult, im);
+}
+
+// std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im) {
+//     // Save the image to a temporary file
+//     std::string tempImagePath = "/tmp/temp_card_image.png";
+//     cv::imwrite(tempImagePath, im);
+
+//     // Construct the AWS CLI command
+//     std::string cmd = "aws rekognition detect-text --image-bytes fileb://" + tempImagePath + " 2>&1"; // 2>&1 to redirect stderr to stdout
+
+//     // Execute the command and get the output
+//     std::string textResult;
+//     try {
+//         std::string jsonOutput = execOCR(cmd.c_str());
+//         std::cout << jsonOutput << std::endl;
+
+
+//         // Parse the JSON output
+//         auto json = nlohmann::json::parse(jsonOutput);
+
+//         // Check if TextDetections array is present and not empty
+//         if (!json["TextDetections"].empty()) {
+//             // Extract the DetectedText field from the first object in the TextDetections array
+//             textResult = json["TextDetections"][0]["DetectedText"];
+//             std::cout << textResult << std::endl;
+//         } else {
+//             textResult = "No text detected";
+//         }
+//     } catch (const std::runtime_error& e) {
+//         textResult = "Error executing AWS CLI command: ";
+//         textResult += e.what();
+//     } catch (const nlohmann::json::parse_error& e) {
+//         textResult = "JSON parsing error: ";
+//         textResult += e.what();
+//     }
+
+//     // Return the extracted text and the image
+//     return std::make_tuple(textResult, im);
+// }
 
 void CardOCR::run()
 {
@@ -112,7 +218,7 @@ void CardOCR::run()
 
 
     emit feedCardRequested();
-    emit requestProcessingDelay(3000);
+    // emit requestProcessingDelay(3000);
 }
 
 void CardOCR::processCard() {
@@ -130,7 +236,7 @@ void CardOCR::processCard() {
             // Emit signal for processed frame
             // emit frameProcessed(frame);
             cv::imwrite("/home/pi/mtg-collection-manager/src/cv/BEFORECROPPING.jpg", frame);
-            cv::Mat croppedImage = preprocessImage(frame, 0.28, 0.45, 3.0/4.0, 1.1/6.0);
+            cv::Mat croppedImage = preprocessImage(frame, 0.28, 0.45, 1.0/4.0, 3.5/6.0);
 
             
             // Process the cropped image with Tesseract
@@ -138,7 +244,6 @@ void CardOCR::processCard() {
 
             
             std::string cardText = std::get<0>(output);
-            std::cout << cardText << std::endl;
 
             std::vector<std::string> cardNames;
 
@@ -146,10 +251,10 @@ void CardOCR::processCard() {
 
 
             // Save the image and add card to database
-            std::string imagePath = "/home/pi/mtg-collection-manager/src/database/images" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".png";
+            // std::string imagePath = "/home/pi/mtg-collection-manager/src/database/images" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".png";
             // cv::imwrite(imagePath, croppedImage);
 
-            emit findAndAddMostSimilarCard(cardText, imagePath);
+            emit findAndAddMostSimilarCard(cardText);
 
         }
     }
@@ -157,10 +262,11 @@ void CardOCR::processCard() {
 }
 
 void CardOCR::onProcessTimerTimeout() {
-    processCard(); // Process the card
+    // processCard(); // Process the card
 
     if (!stopRequested) {
         emit feedCardRequested();
+        // requestProcessingDelay(5000);
     } else {
         capFace.release(); // Release the camera
         emit finishedScanning(); // Notify that the process is finished
@@ -168,14 +274,14 @@ void CardOCR::onProcessTimerTimeout() {
 }
 
 void CardOCR::onFeedTimerTimeout() {
-    processCard(); // Process the card
+    // processCard(); // Process the card
 
-    if (!stopRequested) {
-        emit feedCardRequested();
-    } else {
-        capFace.release(); // Release the camera
-        emit finishedScanning(); // Notify that the process is finished
-    }
+    // if (!stopRequested) {
+    //     emit feedCardRequested();
+    // } else {
+    //     capFace.release(); // Release the camera
+    //     emit finishedScanning(); // Notify that the process is finished
+    // }
 }
 
 void CardOCR::handleStopScanning() {
@@ -187,16 +293,16 @@ void CardOCR::handleStopScanning() {
 cv::Mat CardOCR::preprocessImage(const cv::Mat &image, double leftMarginPercent, 
                                  double rightMarginPercent, double topMarginPercent,
                                  double bottomMarginPercent) {
-    cv::Mat gray;
-    if (image.channels() > 1) {
-        cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
-    } else {
-        gray = image.clone();
-    }
+    // cv::Mat gray;
+    // if (image.channels() > 1) {
+    //     cv::cvtColor(image, gray, cv::COLOR_BGR2GRAY);
+    // } else {
+    //     gray = image.clone();
+    // }
 
     // Apply thresholding
-    cv::Mat thresh;
-    cv::threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
+    cv::Mat thresh = image;
+    // cv::threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
 
     // Calculate the margins as pixel values
     int leftMargin = static_cast<int>(thresh.cols * leftMarginPercent);

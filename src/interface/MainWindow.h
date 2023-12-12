@@ -41,6 +41,7 @@ signals:
     void gpio22Triggered();
     void gpio17Triggered();
     void showCards(std::vector<DatabaseManager::CardInfo> cards);
+    void processTimeout();
     
 public slots:
     void showMainMenuScreen();
@@ -60,6 +61,7 @@ public slots:
     void feedCard();
     void startProcessTimer(int msec);
     void onProcessTimerTimeout();
+    void findAndAddMostSimilarCard(const std::string& inputCardName);
     
 
 

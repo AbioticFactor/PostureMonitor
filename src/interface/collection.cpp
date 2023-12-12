@@ -128,7 +128,7 @@ void Collection::showCardImages(std::vector<DatabaseManager::CardInfo> cards) {
     int row = 0, col = 0;
     for (int i = 0; i < imagePaths.size(); ++i) {
         const QString &path = imagePaths[i];
-        if (QFileInfo::exists(path) && QFileInfo(path).isFile()) {
+        if (QFileInfo::exists(path)) {
             QPixmap pixmap(path);
             QPushButton *button = new QPushButton;
             button->setIcon(QIcon(pixmap.scaled(scaledWidth, scaledHeight, Qt::KeepAspectRatio)));

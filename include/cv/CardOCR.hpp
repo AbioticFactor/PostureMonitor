@@ -29,7 +29,7 @@ public slots:
     
 
 signals:
-    void findAndAddMostSimilarCard(const std::string& inputCardName, const std::string& imagePath);
+    void findAndAddMostSimilarCard(const std::string& inputCardName);
     void frameProcessed(cv::Mat frame);
     void feedCardRequested();
     void finishedScanning();
@@ -49,6 +49,7 @@ private:
     void destroyApi(tesseract::TessBaseAPI* api);
     void destroyPix(Pix* p);
     void destroyChar(char* c);
+    std::string execOCR(const char* cmd);
 
     volatile bool stopRequested = false;
 };

@@ -21,7 +21,7 @@ Feeder::~Feeder()
 void Feeder::feedCard()
 {
     gpioServo(SERVO, pwmDispense);
-    QTimer::singleShot(1300, this, [this]()
+    QTimer::singleShot(2500, this, [this]()
                        { stop(); });
     
 }

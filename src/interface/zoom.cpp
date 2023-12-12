@@ -46,8 +46,13 @@ void Zoom::showEnlargedCardImage(QString imagePath) {
         ui->scrollArea->widget()->layout()->addWidget(imageLabel);
     }
 
-    // Set the pixmap to the label and scale it
-    imageLabel->setPixmap(pixmap.scaled(ui->scrollArea->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    // Scaling factor, for example, 90% of the scroll area's width
+    double scaleFactor = 0.88;
+    int newWidth = ui->scrollArea->width() * scaleFactor;
+    int newHeight = pixmap.height() * newWidth / pixmap.width();
+
+    // Set the pixmap to the label with the new dimensions
+    imageLabel->setPixmap(pixmap.scaled(newWidth, newHeight, Qt::KeepAspectRatioByExpanding));
     imageLabel->setAlignment(Qt::AlignCenter);  // Center the image within the QLabel
 
 }

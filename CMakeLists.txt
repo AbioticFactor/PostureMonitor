@@ -7,6 +7,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 set(CMAKE_BUILD_TYPE Debug)
+set(SERVICE_COMPONENTS s3 rekognition)
+# set(SERVICE_COMPONENTS s3)
 
 # Find required packages
 find_package(OpenCV REQUIRED)
@@ -19,6 +21,11 @@ if (NOT PIGPIO_LIBRARY)
     message(FATAL_ERROR "pigpio library not found")
 endif()
 find_package(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+# find_package(AWSSDK REQUIRED COMPONENTS rekognition)
+# find_package(aws-cpp-sdk-core REQUIRED)
+find_package(AWSSDK REQUIRED COMPONENTS ${SERVICE_COMPONENTS})
+find_package(CURL REQUIRED)
+
 
 # Enable AUTOMOC, AUTORCC
 set(CMAKE_AUTOMOC ON)
@@ -51,6 +58,8 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   Qt5::Core 
   Qt5::Gui 
   Qt5::Widgets
+  ${AWSSDK_LINK_LIBRARIES}
+  CURL::libcurl
 )
 
 # Include directories for the project
@@ -65,9 +74,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   ${Leptonica_INCLUDE_DIRS}
   #LEPT_INCLUDE_DIRS
   /home/pi/SQLiteCpp/include
+  /home/pi/.local/bin
   ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}_autogen/include
   ${CMAKE_CURRENT_SOURCE_DIR}/src/interface
   ${CMAKE_CURRENT_BINARY_DIR}
+  ${AWSSDK_INCLUDE_DIRS}
+  
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

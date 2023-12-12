@@ -33,16 +33,16 @@ MainWindow::MainWindow(QMainWindow *parent)
       feedTimer(new QTimer())
 
 {
-    currentCriteria.keywords = "";
-    currentCriteria.rarities = QStringList{"Common"}; // Example values
-    //currentCriteria.types = QStringList{"Creature", "Planeswalker", "Instant", "Sorcery", "Land", "Enchantment", "Artifact", "Battle", "Commanders"}; // Example values
-    //currentCriteria.manaCosts = QList<int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}; // Example values
-    //currentCriteria.colors = QStringList{"White", "Blue", "Black", "Red", "Green", "Colorless", "Multi-colored"}; // Exam
+
+    // currentCriteria.colors = QStringList{"Blue"}; // Exam
+
 
     std::cout << "about to ui arrow setup" << std::endl;
 
     ui->setupUi(this);
     std::cout << "setup ui" << std::endl;
+
+
 
 
     // stackedWidget.addWidget(this);
@@ -63,6 +63,9 @@ MainWindow::MainWindow(QMainWindow *parent)
     stackedWidget.addWidget(typeScreen);
     stackedWidget.addWidget(filterScreen);
     stackedWidget.addWidget(collectionScreen);
+
+    // dbManager->addCard("Fallaji Archaeologist", 2, "Blue", "Creature", "Common", "/home/pi/mtg-collection-manager/src/interface/images/fallaji_archaeologist.png", true);
+    // dbManager->addCard("Swiftgear Drake", 5, "Colorless", "Artifact", "Common", "/home/pi/mtg-collection-manager/src/interface/images/swiftgear_drake.png", true);
 
     std::cout << "added widgets" << std::endl;
     
@@ -111,11 +114,20 @@ MainWindow::MainWindow(QMainWindow *parent)
 
     //Card OCR feeder
     connect(cardOCR, &CardOCR::feedCardRequested, this, &MainWindow::feedCard);
-    connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::feedCard);
+    // connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::feedCard);
     connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::startProcessTimer);
+    connect(cardOCR, &CardOCR::findAndAddMostSimilarCard, this, &MainWindow::findAndAddMostSimilarCard);
+
 
     connect(processTimer, &QTimer::timeout, this, &MainWindow::onProcessTimerTimeout);
-
+    connect(this, &MainWindow::processTimeout, cardOCR, &CardOCR::onProcessTimerTimeout);
+    
+    // currentCriteria.keywords = "";
+    // currentCriteria.rarities = QStringList{"Common"}; // Example values
+    // currentCriteria.types = QStringList{"Creature", "Planeswalker", "Instant", "Sorcery", "Land", "Enchantment", "Artifact", "Battle", "Commanders"}; // Example values
+    // currentCriteria.manaCosts = QList<int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}; // Example values
+    //currentCriteria.colors = QStringList{"White", "Blue", "Black", "Red", "Green", "Colorless", "Multi-colored"}; // Exam
+    currentCriteria.colors = QStringList{"Blue"}; // Exam
     std::cout << "connected it all" << std::endl;
 
 }
@@ -157,15 +169,18 @@ void MainWindow::on_EmailButton_clicked() {
 
     std::string data;
     for (const auto& card : cards) {
-        std::cout << card.name << std::endl;
-        data += card.name + ", " + std::to_string(card.mana_cost) + ", " + card.color + "\n"; // etc.
+        data += card.name + ", " + std::to_string(card.mana_cost) + ", " + card.color + "\n";
     }
     std::ofstream file("/home/pi/mtg-collection-manager/data.csv");
     file << data;
     file.close();
 
-    std::string command = "echo 'Your card collection data' | mpack  -s 'Database Data' /home/pi/mtg-collection-manager/data.csv aoa34@cornell.edu";
+    std::string command = "echo 'Your card collection data' | mutt -s 'Database Data' -a /home/pi/mtg-collection-manager/data.csv -- aoa34@cornell.edu";
     system(command.c_str());
+
+
+    // std::string command = "echo 'Your card collection data' | /usr/bin/mpack  -s 'Database Data' /home/pi/mtg-collection-manager/data.csv aoa34@cornell.edu";
+    // system(command.c_str());
 
     // remove("/home/pi/mtg-collection-manager/data.csv");
 }
@@ -221,9 +236,8 @@ void MainWindow::handleGpio17Trigger()
 
 void MainWindow::handleGpio22Trigger()
 {
-    
-    QApplication::quit();
     system("sudo shutdown -h now");
+    // QApplication::quit();
 }
 
 void MainWindow::performSearch()
@@ -249,6 +263,7 @@ void MainWindow::performSearch()
 
 void MainWindow::feedCard(){
     feeder->feedCard();
+    startProcessTimer(4000);
 }
 
 std::vector<std::string> MainWindow::convertQStringList(const QStringList &list)
@@ -262,7 +277,12 @@ std::vector<std::string> MainWindow::convertQStringList(const QStringList &list)
 }
 
 void MainWindow::onProcessTimerTimeout() {
-    cardOCR->onProcessTimerTimeout();  // Start the timer with a 3-second interval
+    // cardOCR->onProcessTimerTimeout();  // Start the timer with a 3-second interval
+    processTimer->stop(); 
+    std::cout << "processing a card" << std::endl;
+    cardOCR->processCard(); // Now process the card
+    std::cout << "processed a card" << std::endl;
+    emit processTimeout();
 }
 
 void MainWindow::startProcessTimer(int msec){
@@ -270,3 +290,7 @@ void MainWindow::startProcessTimer(int msec){
 }
 
 
+void MainWindow::findAndAddMostSimilarCard(const std::string& inputCardName){
+    dbManager->fetchCard(inputCardName);
+
+}
