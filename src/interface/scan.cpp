@@ -40,3 +40,10 @@ void Scan::displayFrame(const cv::Mat &frame)
     ui->imageLabel->setPixmap(pixmap.scaled(ui->imageLabel->size(), Qt::KeepAspectRatio, Qt::FastTransformation));
     ui->imageLabel->setScaledContents(true);
 }
+
+
+void Scan::showCardText(const std::string& cardText)
+{
+    std::cout << "showing card text" << std::endl;
+    ui->imageLabel->setText(QString::fromStdString(cardText));
+}

@@ -104,7 +104,7 @@ std::string CardOCR::execOCR(const char* cmd) {
 
 std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im) {
     // Initialize the AWS SDK
-    Aws::Auth::AWSCredentials awsCredentials("KEY", "SECRET KEY");
+    Aws::Auth::AWSCredentials awsCredentials("AKIAZ3IGBYQVTIU6XXMA", "WC5pjz0RgfUCuFWD/HbYhB/Q4keXHUSxuwnxAESB");
 
     Aws::SDKOptions options;
     Aws::InitAPI(options);
@@ -244,6 +244,7 @@ void CardOCR::processCard() {
 
             
             std::string cardText = std::get<0>(output);
+            emit cardTextGotten(cardText);
 
             std::vector<std::string> cardNames;
 

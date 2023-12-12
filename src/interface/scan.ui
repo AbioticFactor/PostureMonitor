@@ -51,7 +51,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>VIDEOSTREAM</string>
+     <string>Scanning...</string>
     </property>
    </widget>
   </widget>

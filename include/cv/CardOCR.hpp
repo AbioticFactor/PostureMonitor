@@ -34,6 +34,7 @@ signals:
     void feedCardRequested();
     void finishedScanning();
     void requestProcessingDelay(int delay);
+    void cardTextGotten(const std::string& cardText);
 
 private:
     std::unique_ptr<tesseract::TessBaseAPI, std::function<void(tesseract::TessBaseAPI*)>> api;

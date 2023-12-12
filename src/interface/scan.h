@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QPushButton>
 #include <opencv2/opencv.hpp>
+#include <QWidget>
 
 
 namespace Ui {
@@ -25,6 +26,7 @@ signals:
 public slots:
     void on_stopButton_clicked();
     void displayFrame(const cv::Mat &frame);
+    void showCardText(const std::string& cardText);
 
 private:
     Ui::Scan *ui;
