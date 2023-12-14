@@ -142,7 +142,6 @@ void Collection::showCardImages(std::vector<DatabaseManager::CardInfo> cards) {
 
             layout->addWidget(button, row, col, Qt::AlignCenter);
 
-            // Increment column; if at end, reset column and increment row
             col++;
             if (col >= 2) { // Assuming 2 images per row
                 col = 0;

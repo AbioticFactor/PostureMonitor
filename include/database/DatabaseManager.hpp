@@ -37,6 +37,7 @@ public:
     CardInfo getCardDetails(const std::string& cardName);
     std::vector<CardInfo> getAllCards(bool isUserCollection);
     void downloadAndSaveImage(const std::string& imageUrl, std::string& savedImagePath);
+    void fetchCardAsync(const std::string& name);
 
 
 
@@ -45,7 +46,6 @@ private:
     SQLite::Database db;
 
     std::string join(const std::vector<std::string>& elements, const std::string& delimiter);
-    int levenshteinDistance(const std::string &s1, const std::string &s2);
     static size_t WriteCallback(void* contents, size_t size, size_t nmemb, std::string* s) {
         size_t newLength = size * nmemb;
         try {

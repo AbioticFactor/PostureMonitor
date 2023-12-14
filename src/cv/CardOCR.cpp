@@ -6,7 +6,6 @@
 #include <cv/CardOCR.hpp>
 #include <regex>
 #include <aws/core/Aws.h>
-// #include <aws/core/utils/ByteBuffer.h>
 #include <aws/core/utils/memory/stl/AWSStringStream.h>
 #include <aws/rekognition/RekognitionClient.h>
 #include <aws/rekognition/model/DetectTextRequest.h>
@@ -63,7 +62,6 @@ CardOCR::CardOCR() : api(new tesseract::TessBaseAPI(), [](tesseract::TessBaseAPI
 }
 
 CardOCR::~CardOCR() {
-    // Destructor implementation (if needed)
 }
 
 bool CardOCR::initializeOCR() {
@@ -160,43 +158,6 @@ std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im) {
     return std::make_tuple(textResult, im);
 }
 
-// std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im) {
-//     // Save the image to a temporary file
-//     std::string tempImagePath = "/tmp/temp_card_image.png";
-//     cv::imwrite(tempImagePath, im);
-
-//     // Construct the AWS CLI command
-//     std::string cmd = "aws rekognition detect-text --image-bytes fileb://" + tempImagePath + " 2>&1"; // 2>&1 to redirect stderr to stdout
-
-//     // Execute the command and get the output
-//     std::string textResult;
-//     try {
-//         std::string jsonOutput = execOCR(cmd.c_str());
-//         std::cout << jsonOutput << std::endl;
-
-
-//         // Parse the JSON output
-//         auto json = nlohmann::json::parse(jsonOutput);
-
-//         // Check if TextDetections array is present and not empty
-//         if (!json["TextDetections"].empty()) {
-//             // Extract the DetectedText field from the first object in the TextDetections array
-//             textResult = json["TextDetections"][0]["DetectedText"];
-//             std::cout << textResult << std::endl;
-//         } else {
-//             textResult = "No text detected";
-//         }
-//     } catch (const std::runtime_error& e) {
-//         textResult = "Error executing AWS CLI command: ";
-//         textResult += e.what();
-//     } catch (const nlohmann::json::parse_error& e) {
-//         textResult = "JSON parsing error: ";
-//         textResult += e.what();
-//     }
-
-//     // Return the extracted text and the image
-//     return std::make_tuple(textResult, im);
-// }
 
 void CardOCR::run()
 {
@@ -213,8 +174,6 @@ void CardOCR::run()
     capFace.set(cv::CAP_PROP_FRAME_WIDTH, 1280);
     capFace.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
 
-
-    // bool cardsLeft = true; // handle making this false with timer
 
 
     emit feedCardRequested();
@@ -269,20 +228,13 @@ void CardOCR::onProcessTimerTimeout() {
         emit feedCardRequested();
         // requestProcessingDelay(5000);
     } else {
-        capFace.release(); // Release the camera
-        emit finishedScanning(); // Notify that the process is finished
+        capFace.release();
+        emit finishedScanning();
     }
 }
 
 void CardOCR::onFeedTimerTimeout() {
-    // processCard(); // Process the card
 
-    // if (!stopRequested) {
-    //     emit feedCardRequested();
-    // } else {
-    //     capFace.release(); // Release the camera
-    //     emit finishedScanning(); // Notify that the process is finished
-    // }
 }
 
 void CardOCR::handleStopScanning() {
@@ -301,30 +253,24 @@ cv::Mat CardOCR::preprocessImage(const cv::Mat &image, double leftMarginPercent,
     //     gray = image.clone();
     // }
 
-    // Apply thresholding
     cv::Mat thresh = image;
     // cv::threshold(gray, thresh, 150, 255, cv::THRESH_BINARY_INV);
 
-    // Calculate the margins as pixel values
     int leftMargin = static_cast<int>(thresh.cols * leftMarginPercent);
     int rightMargin = static_cast<int>(thresh.cols * rightMarginPercent);
     int topMargin = static_cast<int>(thresh.rows * topMarginPercent);
     int bottomMargin = static_cast<int>(thresh.rows * bottomMarginPercent);
 
-    // Ensure margins do not overlap and exceed image boundaries
     leftMargin = std::max(0, std::min(leftMargin, thresh.cols - 1));
     rightMargin = std::max(0, std::min(rightMargin, thresh.cols - 1 - leftMargin));
     topMargin = std::max(0, std::min(topMargin, thresh.rows - 1));
     bottomMargin = std::max(0, std::min(bottomMargin, thresh.rows - 1 - topMargin));
 
-    // Calculate the width and height of the ROI
     int width = thresh.cols - leftMargin - rightMargin;
     int height = thresh.rows - topMargin - bottomMargin;
 
-    // Create the rectangle for the region of interest
     cv::Rect roi(leftMargin, topMargin, width, height);
 
-    // Crop the image to the ROI
     cv::Mat croppedImg = thresh(roi);
 
 
@@ -354,15 +300,6 @@ void CardOCR::destroyChar(char* c) {
         delete[] c;
     }
 }
-
-    // std::pair<cv::Mat, cv::Mat> captureCard()
-    // {
-    //     cv::Mat faceFrame, backFrame;
-    //     capFace >> faceFrame;
-    //     capBack >> backFrame;
-    //     return std::make_pair(faceFrame, backFrame);
-
-    // }
 
 
 

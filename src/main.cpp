@@ -30,10 +30,9 @@ public:
         gpioSetPullUpDown(17, PI_PUD_UP);
         gpioSetPullUpDown(22, PI_PUD_UP);
 
-        // Setup a timer to periodically check GPIO state
         QTimer *timer = new QTimer(this);
         connect(timer, &QTimer::timeout, this, &GpioMonitor::checkGpio);
-        timer->start(100); // Check every 100 ms
+        timer->start(100);
     }
 
     ~GpioMonitor()
@@ -49,6 +48,7 @@ private slots:
             QCoreApplication::quit();
         }
         else if (gpioRead(22) == 0) {
+            QCoreApplication::quit();
             system("sudo shutdown -h now");
         }
     }

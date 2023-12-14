@@ -3,7 +3,7 @@
 #include <pigpio.h>
 
 Feeder::Feeder()
-    : SERVO(5), pwmDispense(1700), pwmNeutral(1580)
+    : SERVO(5), pwmDispense(1710), pwmNeutral(1580)
 {
     if (gpioInitialise() < 0)
     {
@@ -21,7 +21,7 @@ Feeder::~Feeder()
 void Feeder::feedCard()
 {
     gpioServo(SERVO, pwmDispense);
-    QTimer::singleShot(2500, this, [this]()
+    QTimer::singleShot(1740, this, [this]()
                        { stop(); });
     
 }

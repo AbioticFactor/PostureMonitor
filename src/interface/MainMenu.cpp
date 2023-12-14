@@ -8,10 +8,6 @@ MainMenu::MainMenu(QWidget *parent)
 {
   ui->setupUi(this);
 
-  // Connect button signals to respective slots
-  // connect(ui->searchButton, &QPushButton::clicked, this, &Search::on_searchButton_clicked);
-  // connect(ui->editFiltersButton, &QPushButton::clicked, this, &Search::on_editFiltersButton_clicked);
-  // connect(ui->backButton, &QPushButton::clicked, this, &Search::on_backButton_clicked);
 }
 
 MainMenu::~MainMenu()

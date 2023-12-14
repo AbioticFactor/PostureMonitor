@@ -22,17 +22,16 @@ void Scan::on_stopButton_clicked()
 {
     ui->stopButton->setEnabled(false);
 
-    // Re-enable the button after 500 ms
     QTimer::singleShot(500, [this]()
                        { ui->stopButton->setEnabled(true); });
     QStringList selectedRarities;
-    emit stopClicked(); // Emit signal to indicate stopping the scanning process
+    emit stopClicked();
 }
 
 void Scan::displayFrame(const cv::Mat &frame)
 {
     cv::Mat rgbFrame;
-    cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB); // Convert BGR to RGB
+    cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB);
 
     QImage qimg(rgbFrame.data, rgbFrame.cols, rgbFrame.rows, rgbFrame.step, QImage::Format_RGB888);
     QPixmap pixmap = QPixmap::fromImage(qimg);

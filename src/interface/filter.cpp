@@ -24,7 +24,6 @@ void Filter::on_okButton_clicked()
 {
     ui->okButton->setEnabled(false);
 
-    // Re-enable the button after 500 ms
     QTimer::singleShot(500, [this]()
                        { ui->okButton->setEnabled(true); });
     QList<int> manaCosts;
@@ -38,7 +37,6 @@ void Filter::on_rarityButton_clicked()
 {
     ui->rarityButton->setEnabled(false);
 
-    // Re-enable the button after 500 ms
     QTimer::singleShot(500, [this]()
                        { ui->rarityButton->setEnabled(true); });
     emit navigateToRarityScreen();
@@ -55,7 +53,6 @@ void Filter::on_typesButton_clicked()
 
 void Filter::gatherManaCosts(QList<int> &manaCosts)
 {
-    // Iterate over manaCostCheckBoxes and gather selected costs
     for (QPushButton *pushButton : {ui->b0, ui->b1, ui->b2, ui->b3, ui->b4, ui->b5, ui->b6})
     {
         if (pushButton->isChecked())
@@ -67,7 +64,6 @@ void Filter::gatherManaCosts(QList<int> &manaCosts)
 
 void Filter::gatherColors(QList<QString> &colors)
 {
-    // Iterate over colorCheckBoxes and gather selected colors
     for (QPushButton *pushbutton : {ui->bWhite, ui->bBlue, ui->bGreen, ui->bBlack, ui->bRed, ui->bMulticolored, ui->bColorless})
     {
         if (pushbutton->isChecked())

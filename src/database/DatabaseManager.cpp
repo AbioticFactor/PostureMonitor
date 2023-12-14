@@ -11,6 +11,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <QtConcurrent/QtConcurrent>
 
 
 DatabaseManager::DatabaseManager(const char* db_name) : dbName(db_name), db(dbName, SQLite::OPEN_READWRITE | SQLite::OPEN_CREATE) {
@@ -72,7 +73,6 @@ void DatabaseManager::addCard(const std::string& name, int mana_cost,
                               const std::string& color, const std::string& card_type, 
                               const std::string& rarity, const std::string& image_path, 
                               bool isUserCollection) {
-    // Insert into reference_cards
     std::string insertQueryRef = "INSERT INTO reference_cards (name, mana_cost, color, card_type, rarity, image_path) VALUES (?, ?, ?, ?, ?, ?)";
     SQLite::Statement queryInsertRef(db, insertQueryRef);
     queryInsertRef.bind(1, name);
@@ -120,12 +120,10 @@ std::vector<DatabaseManager::CardInfo> DatabaseManager::searchCards(const std::v
 
     std::vector<std::string> conditions;
 
-    // Add rarity filter
     if (!rarities.empty()) {
         conditions.push_back("rarity IN ('" + join(rarities, "', '") + "')");
     }
 
-    // Add type filter using LIKE for substring matching
     if (!types.empty()) {
         std::string typeCondition;
         for (size_t i = 0; i < types.size(); ++i) {
@@ -321,21 +319,6 @@ DatabaseManager::CardInfo DatabaseManager::getCardDetails(const std::string& car
     return cardDetails;
 }
 
-// Function to calculate the Levenshtein distance
-int DatabaseManager::levenshteinDistance(const std::string &s1, const std::string &s2) {
-    const size_t len1 = s1.size(), len2 = s2.size();
-    std::vector<std::vector<int>> d(len1 + 1, std::vector<int>(len2 + 1));
-
-    d[0][0] = 0;
-    for(int i = 1; i <= len1; ++i) d[i][0] = i;
-    for(int j = 1; j <= len2; ++j) d[0][j] = j;
-
-    for(int i = 1; i <= len1; ++i)
-        for(int j = 1; j <= len2; ++j)
-            d[i][j] = std::min({ d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (s1[i - 1] == s2[j - 1] ? 0 : 1) });
-
-    return d[len1][len2];
-}
 
 std::vector<DatabaseManager::CardInfo> DatabaseManager::getAllCards(bool isUserCollection) {
     std::vector<CardInfo> cards;
@@ -361,3 +344,8 @@ std::vector<DatabaseManager::CardInfo> DatabaseManager::getAllCards(bool isUserC
     return cards;
 }
 
+void DatabaseManager::fetchCardAsync(const std::string& name) {
+    QtConcurrent::run([=]() {
+        fetchCard(name);
+    });
+}

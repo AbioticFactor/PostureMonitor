@@ -21,7 +21,6 @@ public:
 
 public slots:
     void showEnlargedCardImage(QString imagePath);
-    // std::vector<std::string> convertQStringList(const QStringList &list);
 
 signals:
     void backRequested();

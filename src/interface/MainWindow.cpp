@@ -34,9 +34,6 @@ MainWindow::MainWindow(QMainWindow *parent)
 
 {
 
-    // currentCriteria.colors = QStringList{"Blue"}; // Exam
-
-
     std::cout << "about to ui arrow setup" << std::endl;
 
     ui->setupUi(this);
@@ -55,7 +52,6 @@ MainWindow::MainWindow(QMainWindow *parent)
     Collection *collectionScreen = new Collection(this);
 
 
-    // Initialize the stackedWidget with screens
     stackedWidget.addWidget(mainMenuScreen);
     stackedWidget.addWidget(scanScreen);
     stackedWidget.addWidget(searchScreen);
@@ -63,9 +59,6 @@ MainWindow::MainWindow(QMainWindow *parent)
     stackedWidget.addWidget(typeScreen);
     stackedWidget.addWidget(filterScreen);
     stackedWidget.addWidget(collectionScreen);
-
-    // dbManager->addCard("Fallaji Archaeologist", 2, "Blue", "Creature", "Common", "/home/pi/mtg-collection-manager/src/interface/images/fallaji_archaeologist.png", true);
-    // dbManager->addCard("Swiftgear Drake", 5, "Colorless", "Artifact", "Common", "/home/pi/mtg-collection-manager/src/interface/images/swiftgear_drake.png", true);
 
     std::cout << "added widgets" << std::endl;
     
@@ -117,6 +110,7 @@ MainWindow::MainWindow(QMainWindow *parent)
     // connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::feedCard);
     connect(cardOCR, &CardOCR::requestProcessingDelay, this, &MainWindow::startProcessTimer);
     connect(cardOCR, &CardOCR::findAndAddMostSimilarCard, this, &MainWindow::findAndAddMostSimilarCard);
+    connect(cardOCR, &CardOCR::cardTextGotten, scanScreen, &Scan::showCardText);
 
 
     connect(processTimer, &QTimer::timeout, this, &MainWindow::onProcessTimerTimeout);
@@ -127,7 +121,7 @@ MainWindow::MainWindow(QMainWindow *parent)
     // currentCriteria.types = QStringList{"Creature", "Planeswalker", "Instant", "Sorcery", "Land", "Enchantment", "Artifact", "Battle", "Commanders"}; // Example values
     // currentCriteria.manaCosts = QList<int>{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13}; // Example values
     //currentCriteria.colors = QStringList{"White", "Blue", "Black", "Red", "Green", "Colorless", "Multi-colored"}; // Exam
-    currentCriteria.colors = QStringList{"Blue"}; // Exam
+    // currentCriteria.colors = QStringList{"Blue"}; // Exam
     std::cout << "connected it all" << std::endl;
 
 }
@@ -175,9 +169,10 @@ void MainWindow::on_EmailButton_clicked() {
     file << data;
     file.close();
 
-    std::string command = "echo 'Your card collection data' | mutt -s 'Database Data' -a /home/pi/mtg-collection-manager/data.csv -- aoa34@cornell.edu";
+    std::string command = "echo 'Your card collection data' | mutt -s 'Database Data' -a /home/pi/mtg-collection-manager/data.csv -- jfs9@cornell.edu";
     system(command.c_str());
-
+    command = "echo 'Your card collection data' | mutt -s 'Database Data' -a /home/pi/mtg-collection-manager/data.csv -- aoa34@cornell.edu";
+    system(command.c_str());
 
     // std::string command = "echo 'Your card collection data' | /usr/bin/mpack  -s 'Database Data' /home/pi/mtg-collection-manager/data.csv aoa34@cornell.edu";
     // system(command.c_str());
@@ -242,7 +237,6 @@ void MainWindow::handleGpio22Trigger()
 
 void MainWindow::performSearch()
 {
-    // Conversion from QStringList to std::vector<std::string>
     std::vector<std::string> raritiesVec = convertQStringList(currentCriteria.rarities);
     std::vector<std::string> typesVec = convertQStringList(currentCriteria.types);
     std::vector<std::string> colorsVec = convertQStringList(currentCriteria.colors);
@@ -255,7 +249,6 @@ void MainWindow::performSearch()
     emit searchCriteriaChanged(currentCriteria);
 
     std::vector<DatabaseManager::CardInfo> cards = dbManager->searchCards(raritiesVec, typesVec, manaVec, colorsVec, true);
-    // get the cards with the current criteria
     
     showCollectionScreen(cards);
 
@@ -277,7 +270,6 @@ std::vector<std::string> MainWindow::convertQStringList(const QStringList &list)
 }
 
 void MainWindow::onProcessTimerTimeout() {
-    // cardOCR->onProcessTimerTimeout();  // Start the timer with a 3-second interval
     processTimer->stop(); 
     std::cout << "processing a card" << std::endl;
     cardOCR->processCard(); // Now process the card
@@ -291,6 +283,7 @@ void MainWindow::startProcessTimer(int msec){
 
 
 void MainWindow::findAndAddMostSimilarCard(const std::string& inputCardName){
-    dbManager->fetchCard(inputCardName);
+    
+    dbManager->fetchCardAsync(inputCardName);
 
 }

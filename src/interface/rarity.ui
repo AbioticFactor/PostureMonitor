@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Common</string>
+     <string>common</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_2">
@@ -37,7 +37,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Basic Lands</string>
+     <string>basic lands</string>
     </property>
    </widget>
    <widget class="QLabel" name="label">
@@ -63,7 +63,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Uncommon</string>
+     <string>uncommon</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_4">
@@ -76,7 +76,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Rare</string>
+     <string>rare</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_5">
@@ -89,7 +89,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>Mythic</string>
+     <string>mythic</string>
     </property>
    </widget>
    <widget class="QPushButton" name="okButton">

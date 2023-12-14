@@ -20,11 +20,11 @@ public:
     ~Collection();
     struct SearchCriteria
     {
-        QString keywords;     // User-inputted search keywords
-        QStringList rarities; // Selected rarities for filtering
-        QStringList types;    // Selected card types for filtering
-        QList<int> manaCosts; // Selected mana costs for filtering, changed from QStringList to QList<int>
-        QStringList colors;   // Selected colors for filtering
+        QString keywords;
+        QStringList rarities;
+        QStringList types;
+        QList<int> manaCosts;
+        QStringList colors;
     };
 public slots:
     void setSearchCriteria(const SearchCriteria &criteria);

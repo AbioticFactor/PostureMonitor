@@ -31,7 +31,6 @@ void Type::on_okButton_clicked()
 {
     ui->okButton->setEnabled(false);
 
-    // Re-enable the button after 500 ms
     QTimer::singleShot(500, [this]()
                        { ui->okButton->setEnabled(true); });
     QStringList selectedRarities;
