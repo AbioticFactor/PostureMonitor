@@ -7,7 +7,6 @@ Type::Type(QWidget *parent) : QWidget(parent),
 {
     ui->setupUi(this);
 
-    // Initialize the list of checkboxes
     typeCheckBoxes = {
         ui->checkBox,   // Creature
         ui->checkBox_2, // Planeswalker

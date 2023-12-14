@@ -101,8 +101,8 @@ std::string CardOCR::execOCR(const char* cmd) {
 }
 
 std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im) {
-    // Initialize the AWS SDK
-    Aws::Auth::AWSCredentials awsCredentials("AKIAZ3IGBYQVTIU6XXMA", "WC5pjz0RgfUCuFWD/HbYhB/Q4keXHUSxuwnxAESB");
+    // Initialize the AWS SDK (redacted our credentials)
+    Aws::Auth::AWSCredentials awsCredentials("", "");
 
     Aws::SDKOptions options;
     Aws::InitAPI(options);
@@ -110,7 +110,6 @@ std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im) {
     std::string textResult;
 
     try {
-        // Convert OpenCV Mat to a byte array
         std::vector<uchar> buf;
         cv::imencode(".png", im, buf);
         auto byteBuffer = Aws::Utils::ByteBuffer(buf.data(), buf.size());
@@ -151,10 +150,8 @@ std::tuple<std::string, cv::Mat> CardOCR::getCardName(const cv::Mat& im) {
         textResult += e.what();
     }
 
-    // Shutdown the AWS SDK
     Aws::ShutdownAPI(options);
 
-    // Return the extracted text and the image
     return std::make_tuple(textResult, im);
 }
 
@@ -194,7 +191,7 @@ void CardOCR::processCard() {
         } else {
             // Emit signal for processed frame
             // emit frameProcessed(frame);
-            cv::imwrite("/home/pi/mtg-collection-manager/src/cv/BEFORECROPPING.jpg", frame);
+            cv::imwrite("src/cv/BEFORECROPPING.jpg", frame);
             cv::Mat croppedImage = preprocessImage(frame, 0.28, 0.45, 1.0/4.0, 3.5/6.0);
 
             
@@ -207,13 +204,6 @@ void CardOCR::processCard() {
 
             std::vector<std::string> cardNames;
 
-
-
-
-            // Save the image and add card to database
-            // std::string imagePath = "/home/pi/mtg-collection-manager/src/database/images" + std::to_string(std::chrono::system_clock::now().time_since_epoch().count()) + ".png";
-            // cv::imwrite(imagePath, croppedImage);
-
             emit findAndAddMostSimilarCard(cardText);
 
         }
@@ -222,8 +212,6 @@ void CardOCR::processCard() {
 }
 
 void CardOCR::onProcessTimerTimeout() {
-    // processCard(); // Process the card
-
     if (!stopRequested) {
         emit feedCardRequested();
         // requestProcessingDelay(5000);
@@ -274,7 +262,7 @@ cv::Mat CardOCR::preprocessImage(const cv::Mat &image, double leftMarginPercent,
     cv::Mat croppedImg = thresh(roi);
 
 
-    cv::imwrite("/home/pi/mtg-collection-manager/src/cv/cropped.jpg", croppedImg);
+    cv::imwrite("src/cv/cropped.jpg", croppedImg);
 
 
     return croppedImg;

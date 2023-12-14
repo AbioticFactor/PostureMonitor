@@ -102,7 +102,6 @@ void DatabaseManager::addCard(const std::string& name, int mana_cost,
 void DatabaseManager::deleteCard(int card_id) {
 
     return;
-    
 }
 
 
@@ -157,7 +156,7 @@ std::vector<DatabaseManager::CardInfo> DatabaseManager::searchCards(const std::v
     if (!conditions.empty()) {
         query += join(conditions, " AND ");
     } else {
-        query += "1 = 1"; // Default condition if no filters are applied
+        query += "1 = 1"; // Default condition if no filters
     }
     
 
@@ -196,7 +195,7 @@ std::string DatabaseManager::mapColorAbbreviationToFullName(const std::string& a
     if (abbreviation == "B") return "Black";
     if (abbreviation == "R") return "Red";
     if (abbreviation == "G") return "Green";
-    return "Unknown"; // Fallback for unknown abbreviation
+    return "Unknown";
 }
 
 void DatabaseManager::fetchCard(const std::string& name) {
